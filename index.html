@@ -1,0 +1,2849 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مافیا سایه حقیقت | بازی کامل</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tahoma', 'Arial', sans-serif; }
+body { background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460); min-height: 100vh; padding: 20px; }
+.container { max-width: 1400px; margin: 0 auto; }
+.header { background: rgba(255,255,255,0.1); border-radius: 15px; padding: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+.header h1 { color: white; font-size: 24px; }
+.badge { padding: 10px 15px; border-radius: 25px; font-size: 13px; font-weight: bold; color: white; }
+.badge-owner { background: #2c3e50; }
+.badge-coin { background: #f39c12; }
+.badge-gem { background: #9b59b6; }
+.mic-btn { padding: 10px 20px; border-radius: 25px; font-size: 14px; font-weight: bold; cursor: pointer; border: none; }
+.mic-on { background: #27ae60; color: white; }
+.mic-off { background: #e74c3c; color: white; }
+.main-layout { display: grid; grid-template-columns: 1fr 350px; gap: 20px; }
+.game-area { background: rgba(255,255,255,0.95); border-radius: 20px; padding: 30px; }
+.tabs { display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; }
+.tab-btn { padding: 12px 25px; border: 2px solid #ddd; border-radius: 10px; background: white; cursor: pointer; font-size: 16px; font-weight: bold; color: #555; }
+.tab-btn.active { background: #3498db; color: white; border-color: #3498db; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+.section-title { text-align: center; color: #2c3e50; margin-bottom: 30px; font-size: 28px; }
+.btn { padding: 12px 25px; border: none; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; margin: 3px; }
+.btn-green { background: #27ae60; color: white; }
+.btn-blue { background: #3498db; color: white; }
+.btn-red { background: #e74c3c; color: white; }
+.btn-yellow { background: #f39c12; color: white; }
+.btn-purple { background: #9b59b6; color: white; }
+.form-box { background: #f8f9fa; border-radius: 15px; padding: 25px; margin-bottom: 30px; display: none; }
+.form-box.active { display: block !important; }
+.form-group { margin-bottom: 15px; }
+.form-group label { display: block; margin-bottom: 5px; color: #2c3e50; font-weight: bold; }
+.form-group input, .form-group select { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 14px; }
+.lobby-card { border: 2px solid #ddd; border-radius: 15px; padding: 15px; background: white; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
+.lobby-card.owner-left { border-color: #e74c3c; background: #fde8e8; }
+.lobby-room { display: none !important; }
+.lobby-room.active { display: block !important; }
+.game-room { display: none !important; }
+.game-room.active { display: block !important; }
+.room-header { text-align: center; margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 15px; }
+.seats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-bottom: 20px; }
+.moderator-top-alert {
+  position:sticky;top:4px;z-index:50;margin:6px 0;padding:8px 12px;
+  border:2px solid #f39c12;border-radius:12px;background:#fff7df;
+  font-weight:700;text-align:center;animation:modBlink 1s infinite;
+}
+@keyframes modBlink { 0%,100%{opacity:1} 50%{opacity:.48} }
+.mod-action-grid { display:grid;grid-template-columns:repeat(2,1fr);gap:7px; }
+.mod-action-grid .control-btn { min-height:38px;font-size:11px; }
+.mod-status { font-size:11px;padding:5px;text-align:center;opacity:.9; }
+.seats-grid.layout-circle { grid-template-columns: repeat(5, 1fr); border-radius:50%; }
+.seats-grid.layout-theater { grid-template-columns: repeat(5, 1fr); }
+.seats-grid.layout-vip { grid-template-columns: repeat(2, 1fr); gap:14px; }
+.seats-grid.layout-square { grid-template-columns: repeat(4, 1fr); }
+.seats-grid.layout-long { grid-template-columns: repeat(10, minmax(70px, 1fr)); overflow-x:auto; }
+.chat-locked .chat-input, .chat-locked .chat-input-row button { opacity:.45; pointer-events:none; }
+.emoji-locked .emoji-btn { opacity:.35; pointer-events:none; }
+
+.seat { border: 3px solid #ddd; border-radius: 12px; padding: 15px; text-align: center; cursor: pointer; background: white; transition: all 0.3s; }
+.seat:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+.seat.occupied { border-color: #27ae60; background: #f0fff4; }
+.seat.selected { border-color: #3498db; background: #f0f8ff; }
+.seat.empty { border-style: dashed; }
+.seat.dead { opacity: 0.4; text-decoration: line-through; }
+.seat.defending { border-color: #f39c12; background: #fff9e6; animation: pulse 1s infinite; }
+.seat .avatar { font-size: 30px; margin-bottom: 5px; }
+.seat .name { font-size: 12px; font-weight: bold; color: #2c3e50; }
+.owner-controls { background: #fff9e6; border: 2px solid #f39c12; border-radius: 15px; padding: 15px; margin-bottom: 20px; display: none !important; }
+.owner-controls.active { display: block !important; }
+.control-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 8px; }
+.control-btn { padding: 10px 15px; border: 2px solid #ddd; border-radius: 8px; background: white; cursor: pointer; font-size: 12px; font-weight: bold; }
+.chat-box { background: #f8f9fa; border-radius: 15px; padding: 15px; margin-bottom: 15px; }
+.chat-messages { max-height: 150px; overflow-y: auto; margin-bottom: 10px; }
+.chat-message { padding: 8px; background: white; border-radius: 8px; margin-bottom: 5px; font-size: 13px; position: relative; }
+.chat-message .likes { font-size: 11px; color: #27ae60; cursor: pointer; }
+.chat-message .dislikes { font-size: 11px; color: #e74c3c; cursor: pointer; }
+.chat-input-row { display: flex; gap: 8px; }
+.chat-input { flex: 1; padding: 10px; border: 2px solid #ddd; border-radius: 8px; }
+.emoji-bar { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px; }
+.emoji-btn { font-size: 18px; cursor: pointer; padding: 3px; border: none; background: none; }
+.scenario-cards { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 15px 0; }
+.scenario-card { border: 3px solid #ddd; padding: 20px; text-align: center; border-radius: 12px; cursor: pointer; font-size: 30px; transition: all 0.3s; }
+.scenario-card.selected { border-color: #3498db !important; background: #f0f8ff !important; }
+.panel { background: rgba(255,255,255,0.95); border-radius: 20px; padding: 20px; }
+.panel-title { text-align: center; margin-bottom: 15px; font-size: 18px; color: #2c3e50; }
+.panel-section { margin-bottom: 15px; }
+.panel-section h4 { color: #555; font-size: 13px; text-align: center; margin-bottom: 8px; }
+.action-btn { width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 8px; background: white; cursor: pointer; font-size: 12px; margin-bottom: 5px; font-weight: bold; }
+.player-select { width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 8px; margin-bottom: 5px; }
+.ban-options { display: flex; flex-wrap: wrap; gap: 5px; }
+.ban-btn { padding: 6px 10px; border: 2px solid #ddd; border-radius: 6px; background: white; cursor: pointer; font-size: 10px; }
+.notification { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); padding: 12px 20px; border-radius: 10px; font-size: 13px; font-weight: bold; z-index: 1000; display: none; color: white; }
+.notification.success { background: #27ae60; }
+.notification.warning { background: #f39c12; }
+.notification.error { background: #e74c3c; }
+.penalty-banner { background: #fde8e8; border: 2px solid #e74c3c; border-radius: 10px; padding: 10px; margin-bottom: 15px; text-align: center; display: none; }
+.penalty-banner.active { display: block; }
+.vote-box { text-align: center; padding: 10px; background: #f8f9fa; border-radius: 10px; margin-bottom: 10px; }
+.vote-btn { padding: 8px 15px; margin: 3px; border: 2px solid #ddd; border-radius: 6px; background: white; cursor: pointer; font-weight: bold; font-size: 12px; }
+.ability-box { text-align: center; padding: 10px; background: #fff9e6; border-radius: 10px; margin-bottom: 10px; }
+.ability-btn { padding: 8px 15px; margin: 3px; border: 2px solid #ddd; border-radius: 6px; background: white; cursor: pointer; font-weight: bold; font-size: 12px; }
+.reward-box { background: #f8f9fa; border-radius: 10px; padding: 10px; margin-top: 10px; }
+.reward-row { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; margin-bottom: 5px; }
+.searching-box { text-align: center; padding: 30px; background: #f8f9fa; border-radius: 15px; margin-bottom: 20px; }
+.searching-animation { font-size: 50px; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.2);} }
+.progress-bar { width: 100%; height: 15px; background: #ddd; border-radius: 8px; overflow: hidden; margin-top: 10px; }
+.progress-fill { height: 100%; background: #27ae60; transition: width 0.5s; width: 0%; }
+.game-phase-box { text-align: center; padding: 20px; background: #f8f9fa; border-radius: 15px; margin-bottom: 15px; }
+.game-phase-box h3 { font-size: 20px; color: #2c3e50; }
+.game-phase-box p { font-size: 14px; color: #7f8c8d; }
+.game-timer { font-size: 35px; color: #e74c3c; font-weight: bold; margin: 10px 0; }
+.speaking-indicator { color: #27ae60; font-weight: bold; font-size: 14px; margin-top: 5px; }
+.end-game-box { text-align: center; padding: 30px; background: #f8f9fa; border-radius: 15px; margin-bottom: 15px; }
+.end-game-box h2 { font-size: 30px; color: #2c3e50; margin-bottom: 10px; }
+.end-game-box .winner-text { font-size: 24px; font-weight: bold; margin-bottom: 10px; }
+.end-game-box .mvp-text { font-size: 18px; color: #9b59b6; font-weight: bold; margin-bottom: 20px; }
+.play-again-btn { padding: 15px 30px; background: #3498db; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 20px; }
+.moderator-watchers { position:relative; display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; min-height:46px; pointer-events:none; }
+.moderator-watcher { background:#7d3c98; color:#fff; border:2px solid #f1c40f; border-radius:14px; padding:6px 10px; font-size:11px; font-weight:bold; box-shadow:0 4px 12px rgba(0,0,0,.25); animation: moderatorBlink 1s infinite; }
+.moderator-watcher.right { animation-delay:.5s; }
+@keyframes moderatorBlink { 0%,45%,100%{opacity:1; transform:translateY(0)} 50%,70%{opacity:.35; transform:translateY(-2px)} }
+.mod-tools-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:8px; }
+.mod-tools-grid input { width:100%; padding:7px; border:2px solid #ddd; border-radius:7px; font-size:11px; }
+.mod-status { background:#fff; border-radius:8px; padding:7px; margin-top:7px; font-size:11px; line-height:1.8; }
+.moderator-panel-in-game { background: #f3e5f5; border: 2px solid #9b59b6; border-radius: 15px; padding: 15px; margin-bottom: 20px; }
+.moderator-panel-in-game h4 { text-align: center; color: #7d3c98; margin-bottom: 10px; }
+.defense-box { text-align: center; padding: 20px; background: #fff9e6; border: 2px solid #f39c12; border-radius: 15px; margin-bottom: 15px; }
+.defense-box h3 { color: #e67e22; margin-bottom: 10px; }
+.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; display: none; justify-content: center; align-items: center; }
+.modal.active { display: flex; }
+.modal-content { background: white; border-radius: 20px; padding: 30px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; }
+.modal-content h2 { text-align: center; margin-bottom: 15px; color: #2c3e50; }
+.modal-content .role-desc { background: #f8f9fa; border-radius: 10px; padding: 15px; margin-bottom: 15px; line-height: 1.8; }
+.modal-content .close-btn { width: 100%; padding: 12px; background: #e74c3c; color: white; border: none; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; }
+@media (max-width: 768px) { .main-layout { grid-template-columns: 1fr; } }
+</style></head><body>
+<div class="container">
+<div id="registerBox" style="background:white;padding:25px;border-radius:15px;max-width:400px;margin:auto;">
+<h2 style="text-align:center;margin-bottom:15px;">📝 ثبت نام</h2>
+<div class="form-group"><label>ایمیل:</label><input type="email" id="regEmail" placeholder="example@email.com"></div>
+<div class="form-group"><label>نام کاربری:</label><input type="text" id="regUser" placeholder="نام کاربری"></div>
+<div class="form-group"><label>سن:</label><input type="number" id="regAge" placeholder="مثلاً ۱۸" min="13" max="120"></div>
+<div class="form-group"><label>تاریخ تولد:</label><input type="date" id="regBirth"></div>
+<button class="btn btn-green" onclick="register()" style="width:100%;">ثبت نام</button>
+<p style="text-align:center;margin:10px 0;">یا</p>
+<button class="btn btn-blue" onclick="showLogin()" style="width:100%;">ورود</button>
+</div>
+
+<div id="loginBox" style="background:white;padding:25px;border-radius:15px;max-width:400px;margin:auto;display:none;">
+<h2 style="text-align:center;margin-bottom:15px;">🔑 ورود</h2>
+<div class="form-group"><label>ایمیل:</label><input type="email" id="loginEmail" placeholder="example@email.com"></div>
+<div class="form-group"><label>نام کاربری:</label><input type="text" id="loginUser" placeholder="نام کاربری"></div>
+<button class="btn btn-green" onclick="login()" style="width:100%;">ورود به بازی</button>
+<p style="text-align:center;margin:10px 0;">یا</p>
+<button class="btn btn-blue" onclick="showRegister()" style="width:100%;">ثبت نام</button>
+</div>
+
+<div id="gameBox" style="display:none;">
+<div class="header">
+<h1>🎭 مافیا سایه حقیقت</h1>
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+<button class="mic-btn mic-on" onclick="toggleMic()">🎤 روشن</button>
+<button class="btn btn-purple" onclick="giveChallenge()" style="font-size:12px;">⚔️ چالش</button>
+<button class="btn btn-blue" onclick="showRoleInfo()" style="font-size:12px;">🎭 نقش من</button>
+<button class="btn btn-purple" onclick="openProfile()" style="font-size:12px;">👤 پروفایل</button>
+<button class="btn btn-yellow" onclick="openGiftModal()" style="font-size:12px;">🎁 هدیه</button>
+<button class="btn btn-green" onclick="openCoinGemShop()" style="font-size:12px;">🛍️ فروشگاه</button>
+<button class="btn btn-blue" onclick="openClanPanel()" style="font-size:12px;">🏰 کلن</button>
+<span class="badge badge-owner">💎 سازنده</span>
+<span class="badge badge-coin">🪙 <span id="coins">3000</span></span>
+<span class="badge badge-gem">💎 <span id="gems">0</span></span>
+</div>
+</div>
+<div class="penalty-banner" id="penaltyBanner"><h3 style="font-size:13px;">⛔ جریمه</h3><p id="penaltyText" style="font-size:11px;"></p></div>
+
+<div class="main-layout">
+<div class="game-area">
+<div class="tabs">
+<button class="tab-btn active" onclick="showTab('friendly')">🤝 دوستانه</button>
+<button class="tab-btn" onclick="showTab('ranked')">🏆 امتیازی</button>
+</div>
+
+<div class="tab-content active" id="friendlyContent">
+<h2 class="section-title">🤝 بازی دوستانه</h2>
+<div class="scenario-cards">
+<div class="scenario-card" onclick="pickScenario('detective')">🔍<p style="font-size:12px;">بازپرس</p></div>
+<div class="scenario-card" onclick="pickScenario('commando')">⚔️<p style="font-size:12px;">تکاور</p></div>
+<div class="scenario-card" onclick="pickScenario('negotiator')">💬<p style="font-size:12px;">مذاکره</p></div>
+</div>
+<p id="selectedScenarioText" style="text-align:center;color:#3498db;font-weight:bold;font-size:13px;">سناریو: بازپرس</p>
+<div style="text-align:center;margin-bottom:15px;">
+<button class="btn btn-green" onclick="showCreateForm()">➕ ساخت لابی</button>
+<button class="btn btn-blue" onclick="showLobbyList()">🔍 پیوستن</button>
+</div>
+<div class="form-box" id="createForm">
+<h3 style="text-align:center;font-size:16px;">ساخت لابی</h3>
+<div class="form-group"><label>نام لابی:</label><input type="text" id="lobbyName"></div>
+<div class="form-group"><label>محیط بازی:</label><select id="lobbyLocation">
+<option value="default">🏠 پیش‌فرض</option><option value="city">🏙️ شهر</option><option value="castle">🏰 قلعه</option><option value="ship">🚢 کشتی</option><option value="forest">🌲 جنگل</option>
+<option value="beach">🏖️ ساحل</option><option value="desert">🏜️ کویر</option><option value="space">🚀 فضا</option><option value="village">🏡 روستا</option><option value="prison">⛓️ زندان</option><option value="island">🏝️ جزیره</option>
+</select></div>
+<div class="form-group"><label>رمز (اختیاری):</label><input type="text" id="lobbyPass"></div>
+<button class="btn btn-green" onclick="createLobby()" style="width:100%;">ساخت لابی</button>
+</div>
+<div id="lobbyListBox" style="display:none;"></div>
+<div class="lobby-room" id="lobbyRoom">
+<div class="room-header">
+<div id="clanLobbyBadge" style="display:none;text-align:center;margin-bottom:8px;font-size:28px;font-weight:bold;"></div>
+<h3 id="roomName" style="font-size:18px;"></h3>
+<p id="roomInfo" style="font-size:12px;"></p>
+<p id="passInfo" style="color:#e67e22;font-size:13px;font-weight:bold;"></p>
+</div>
+<div class="chat-box">
+<h4 style="font-size:13px;margin-bottom:8px;">💬 چت لابی</h4>
+<div class="chat-messages" id="chatBox"></div>
+<div class="emoji-bar" id="emojiBar">
+<button class="emoji-btn" onclick="addEmoji('😀')">😀</button>
+<button class="emoji-btn" onclick="addEmoji('😂')">😂</button>
+<button class="emoji-btn" onclick="addEmoji('😍')">😍</button>
+<button class="emoji-btn" onclick="addEmoji('😎')">😎</button>
+<button class="emoji-btn" onclick="addEmoji('🤔')">🤔</button>
+<button class="emoji-btn" onclick="addEmoji('🔥')">🔥</button>
+<button class="emoji-btn" onclick="addEmoji('👍')">👍</button>
+</div>
+<div id="chatLockStatus" style="text-align:center;font-size:11px;color:#e74c3c;display:none;margin:5px;">🔒 پیام‌رسانی توسط سازنده بسته شده است</div>
+<div class="chat-input-row">
+<input type="text" class="chat-input" id="chatInput" placeholder="پیام..." onkeypress="if(event.key==='Enter')sendChat()">
+<button class="btn btn-blue" onclick="sendChat()" style="font-size:12px;">ارسال</button>
+</div>
+</div>
+<div class="owner-controls active" id="ownerPanel">
+<h4 style="text-align:center;font-size:14px;">👑 کنترل کامل سازنده لابی و بازی</h4>
+<div style="background:#e8f4fd;border:2px solid #3498db;border-radius:10px;padding:10px;margin:10px 0;">
+<h5 style="text-align:center;font-size:13px;margin-bottom:8px;">⏱️ تنظیم زمان‌ها (ثانیه)</h5>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;">
+<div><label>چالش:</label><input type="number" id="timeChallenge" value="60" style="width:100%;padding:5px;"></div>
+<div><label>صحبت عادی:</label><input type="number" id="timeSpeak" value="60" style="width:100%;padding:5px;"></div>
+<div><label>کی‌اس:</label><input type="number" id="timeKS" value="200" style="width:100%;padding:5px;"></div>
+<div><label>شب شهروندان:</label><input type="number" id="timeCitizenNight" value="60" style="width:100%;padding:5px;"></div>
+<div><label>شب مافیا:</label><input type="number" id="timeMafiaNight" value="60" style="width:100%;padding:5px;"></div>
+</div>
+<button class="btn btn-blue" onclick="saveTimes()" style="width:100%;margin-top:8px;">💾 ذخیره زمان‌ها</button>
+</div>
+<div class="control-row"><select class="player-select" id="playerSelect" style="width:auto;flex:1;"><option value="">انتخاب بازیکن...</option></select></div>
+
+<div style="background:#fff8e7;border:2px solid #f39c12;border-radius:10px;padding:10px;margin:10px 0;">
+<h5 style="text-align:center;font-size:13px;margin-bottom:8px;">🛡️ مدیریت بازیکن</h5>
+<div class="control-row">
+<button class="control-btn" style="border-color:#e74c3c;color:#e74c3c;" onclick="blacklistSelectedPlayer()">⛔ مسدود کردن</button>
+<button class="control-btn" style="border-color:#27ae60;color:#27ae60;" onclick="unblacklistSelectedPlayer()">✅ برداشتن از لیست سیاه</button>
+</div>
+<div class="control-row">
+<button class="control-btn" style="border-color:#9b59b6;color:#9b59b6;" onclick="lockSelectedMic()">🔇 قفل همه میکروفون‌ها</button>
+<button class="control-btn" style="border-color:#3498db;color:#3498db;" onclick="unlockAllMics()">🎤 باز کردن همه میکروفون‌ها</button>
+</div>
+</div>
+
+<div style="background:#eef7ff;border:2px solid #3498db;border-radius:10px;padding:10px;margin:10px 0;">
+<h5 style="text-align:center;font-size:13px;margin-bottom:8px;">💬 کنترل چت و ایموجی</h5>
+<div class="control-row">
+<button class="control-btn" style="border-color:#e74c3c;color:#e74c3c;" onclick="toggleChatLock()">🔒 قفل پیام</button>
+<button class="control-btn" style="border-color:#27ae60;color:#27ae60;" onclick="unlockChat()">🔓 باز کردن پیام</button>
+</div>
+<div class="control-row">
+<button class="control-btn" style="border-color:#e74c3c;color:#e74c3c;" onclick="toggleEmojiLock()">🔒 قفل ایموجی</button>
+<button class="control-btn" style="border-color:#27ae60;color:#27ae60;" onclick="unlockEmoji()">🔓 باز کردن ایموجی</button>
+</div>
+</div>
+
+<div style="background:#f5efff;border:2px solid #9b59b6;border-radius:10px;padding:10px;margin:10px 0;">
+<h5 style="text-align:center;font-size:13px;margin-bottom:8px;">🎭 محیط و صندلی بازی</h5>
+<div class="control-row">
+<select id="ownerLocationSelect" class="player-select" style="width:auto;flex:1;">
+<option value="default">🏠 پیش‌فرض</option><option value="city">🏙️ شهر</option><option value="castle">🏰 قلعه</option><option value="ship">🚢 کشتی</option><option value="forest">🌲 جنگل</option>
+<option value="beach">🏖️ ساحل</option><option value="desert">🏜️ کویر</option><option value="space">🚀 فضا</option><option value="village">🏡 روستا</option><option value="prison">⛓️ زندان</option><option value="island">🏝️ جزیره</option>
+</select>
+<button class="control-btn" onclick="changeGameEnvironment()">🌍 تغییر محیط</button>
+</div>
+<div class="control-row">
+<select id="seatLayoutSelect" class="player-select" style="width:auto;flex:1;">
+<option value="classic">🪑 کلاسیک</option><option value="circle">⭕ دایره‌ای</option><option value="theater">🎭 تئاتری</option><option value="vip">💎 VIP</option><option value="square">⬛ مربعی</option><option value="long">📏 ردیفی</option>
+</select>
+<button class="control-btn" onclick="changeSeatLayout()">🪑 تغییر چیدمان صندلی</button>
+</div>
+</div>
+
+<div class="control-row">
+<button class="control-btn" style="border-color:#e74c3c;color:#e74c3c;" onclick="kickPlayer()">🚫 اخراج</button>
+<button class="control-btn" style="border-color:#9b59b6;color:#9b59b6;" onclick="transferOwner()">👑 انتقال مدیریت</button>
+<button class="control-btn" style="border-color:#9b59b6;color:#9b59b6;" onclick="setModerator()">👤 ناظر کردن</button>
+<button class="control-btn" style="border-color:#e74c3c;color:#e74c3c;" onclick="removeModerator()">❌ تنزل ناظر</button>
+</div>
+<div style="background:#f6f0ff;border:2px solid #9b59b6;border-radius:10px;padding:10px;margin:10px 0;">
+<h5 style="text-align:center;font-size:13px;margin-bottom:8px;">🏅 مدیریت مقام‌ها</h5>
+<div class="control-row">
+<button class="control-btn" onclick="setUserRank(document.getElementById('playerSelect').selectedIndex > 0 ? myLobby.seats[parseInt(document.getElementById('playerSelect').value)] : '', 'special')">⭐ کاربر ویژه</button>
+<button class="control-btn" onclick="setModerator()">🛡️ ناظر کردن</button>
+<button class="control-btn" onclick="setUserRank(document.getElementById('playerSelect').selectedIndex > 0 ? myLobby.seats[parseInt(document.getElementById('playerSelect').value)] : '', 'senior_moderator')">👑 ناظر ارشد</button>
+</div>
+<div class="control-row">
+<button class="control-btn" onclick="setUserRank(document.getElementById('playerSelect').selectedIndex > 0 ? myLobby.seats[parseInt(document.getElementById('playerSelect').value)] : '', 'team_admin')">🔧 ادمین تیم</button>
+<button class="control-btn" onclick="setUserRank(document.getElementById('playerSelect').selectedIndex > 0 ? myLobby.seats[parseInt(document.getElementById('playerSelect').value)] : '', 'senior_team_admin')">👑 ادمین ارشد</button>
+<button class="control-btn" style="border-color:#e74c3c;color:#e74c3c;" onclick="removeModerator()">❌ عزل ناظر</button>
+</div>
+</div>
+<div class="control-row">
+<button class="control-btn" style="border-color:#f39c12;color:#f39c12;" onclick="lockRoom()">🔒 قفل اتاق</button>
+<button class="control-btn" style="border-color:#27ae60;color:#27ae60;" onclick="unlockRoom()">🔓 باز کردن</button>
+<button class="control-btn" style="border-color:#9b59b6;color:#9b59b6;" onclick="changeScenario()">🔄 عوض کردن سناریو</button>
+</div>
+<div class="control-row">
+<button class="control-btn" style="border-color:#f39c12;color:#f39c12;" onclick="changePass()">🔑 تغییر رمز</button>
+<button class="control-btn" style="border-color:#3498db;color:#3498db;" onclick="showPass()">👁️ نمایش رمز</button>
+</div>
+<div class="control-row">
+<button class="control-btn" style="border-color:#e74c3c;color:#e74c3c;" onclick="deleteLobby()">🗑️ حذف لابی</button>
+</div>
+<div class="reward-box">
+<h5 style="text-align:center;font-size:13px;margin-bottom:8px;">🏆 جایزه بازی دوستانه</h5>
+<div class="reward-row">
+<select id="rewardType"><option value="coin">🪙 سکه</option><option value="gem">💎 جم</option></select>
+<input id="rewardAmount" type="number" placeholder="تعداد" style="width:90px;">
+</div>
+<div class="reward-row">
+<button class="ban-btn" onclick="setReward(true)">🤖 خودکار</button>
+<button class="ban-btn" onclick="setReward(false)">✏️ دلخواه</button>
+</div>
+<div id="rewardInfo" style="text-align:center;font-size:11px;margin:6px 0;"></div>
+<div class="reward-row">
+<button class="ban-btn" onclick="giveRewardAmount(50)">۵۰</button>
+<button class="ban-btn" onclick="giveRewardAmount(100)">۱۰۰</button>
+<button class="ban-btn" onclick="giveRewardAmount(500)">۵۰۰</button>
+<button class="ban-btn" onclick="giveRewardAmount(1000)">۱۰۰۰</button>
+<button class="ban-btn" onclick="giveRewardAmount(5000)">۵۰۰۰</button>
+<button class="ban-btn" onclick="giveRewardAmount(10000)">۱۰۰۰۰</button>
+</div>
+<div class="reward-row">
+<button class="ban-btn" onclick="giveCustomReward()">✏️ جایزه دلخواه</button>
+<button class="ban-btn" onclick="giveAutoReward()">🤖 جایزه خودکار</button>
+</div>
+</div>
+</div>
+<h4 style="text-align:center;margin:10px 0;">🪑 انتخاب صندلی</h4>
+<div class="seats-grid" id="seatsBox"></div>
+<div style="text-align:center;">
+<button class="btn btn-yellow" onclick="startGame()">🎮 استارت بازی (۵۰ سکه)</button>
+<button class="btn btn-red" onclick="leaveLobby()" style="font-size:12px;">🚪 خروج</button>
+</div>
+</div>
+<div class="game-room" id="gameRoom">
+<div id="clanGameBadge" style="display:none;text-align:center;margin:8px 0;font-size:30px;font-weight:bold;"></div>
+<div class="game-phase-box" id="gamePhaseBox">
+<h3 id="gamePhaseTitle">🌙 شب معارفه</h3>
+<p id="gamePhaseInfo">ابلیتی‌ها قفل هستند</p>
+<div class="game-timer" id="gameTimerDisplay">-</div>
+<p class="speaking-indicator" id="speakingIndicator"></p>
+</div>
+<div id="abilityArea"></div>
+<div id="voteArea"></div>
+<div id="defenseArea"></div>
+<div class="seats-grid" id="gameSeatsBox"></div>
+<div id="endGameArea"></div>
+</div>
+</div>
+
+<div class="tab-content" id="rankedContent">
+<h2 class="section-title">🏆 بازی امتیازی</h2>
+<p style="text-align:center;color:#e74c3c;font-weight:bold;font-size:14px;">ورود: ۵۰ سکه | برد: +۱۰۰ | باخت: -۵۰</p>
+<div class="scenario-cards">
+<div class="scenario-card" onclick="startRankedSearch('detective')">🔍<p style="font-size:12px;">بازپرس</p></div>
+<div class="scenario-card" onclick="startRankedSearch('commando')">⚔️<p style="font-size:12px;">تکاور</p></div>
+<div class="scenario-card" onclick="startRankedSearch('negotiator')">💬<p style="font-size:12px;">مذاکره</p></div>
+</div>
+<div id="rankedSearchBox" style="display:none;"></div>
+<div class="owner-controls" id="rankedTimerPanel" style="margin-top:10px;">
+<h4 style="text-align:center;font-size:14px;">⏱️ تنظیم ۶ زمان حالت امتیازی</h4>
+<div style="background:#e8f4fd;border:2px solid #3498db;border-radius:10px;padding:10px;">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;">
+<div><label>🌞 معرفی روز:</label><input type="number" id="rankedIntroDay" min="1" value="30" style="width:100%;padding:5px;"></div>
+<div><label>🌙 معرفی شب:</label><input type="number" id="rankedIntroNight" min="1" value="30" style="width:100%;padding:5px;"></div>
+<div><label>😈 شب مافیا:</label><input type="number" id="rankedTimeMafia" min="1" value="60" style="width:100%;padding:5px;"></div>
+<div><label>🧑‍🤝‍🧑 شب شهروند:</label><input type="number" id="rankedTimeCitizen" min="1" value="60" style="width:100%;padding:5px;"></div>
+<div><label>🗣️ صحبت عادی:</label><input type="number" id="rankedTimeSpeak" min="1" value="60" style="width:100%;padding:5px;"></div>
+<div><label>⚔️ نوبت چالش:</label><input type="number" id="rankedTimeChallenge" min="1" value="60" style="width:100%;padding:5px;"></div>
+</div>
+<button class="btn btn-blue" onclick="saveRankedTimes()" style="width:100%;margin-top:8px;">💾 ذخیره ۶ زمان</button>
+</div></div>
+<div class="game-room" id="rankedGameRoom">
+<div id="clanRankedBadge" style="display:none;text-align:center;margin:8px 0;font-size:30px;font-weight:bold;"></div>
+<div class="moderator-panel-in-game" id="rankedModPanel" style="display:none;">
+<div class="moderator-top-alert" id="moderatorTopAlert">🛡️ پنل نظارت بازی امتیازی — ناظر در بازی حضور دارد</div>
+<h4>🛡️ پنل نظارت بازی امتیازی</h4>
+<div class="mod-status" id="modPermissionStatus">دسترسی ناظر فعال</div>
+
+<div class="control-row">
+<select class="player-select" id="rankedModPlayerSelect" style="width:auto;flex:1;">
+<option value="">انتخاب بازیکن...</option>
+</select>
+</div>
+
+<div class="control-row">
+<button class="control-btn" style="border-color:#f39c12;color:#f39c12;" onclick="pauseRankedGame()">⏸️ توقف بازی</button>
+<button class="control-btn" style="border-color:#27ae60;color:#27ae60;" onclick="resumeRankedGame()">▶️ ادامه بازی</button>
+<button class="control-btn" style="border-color:#3498db;color:#3498db;" onclick="enterRankedGame()">👁️ ورود/بازگشت به بازی</button>
+</div>
+
+<div style="background:#fff8e7;border:1px solid #f39c12;border-radius:9px;padding:8px;margin:7px 0;">
+<div style="font-size:12px;text-align:center;font-weight:700;margin-bottom:6px;">🎙️ صحبت و سکوت</div>
+<div class="mod-action-grid">
+<button class="control-btn" onclick="modAllowSpeech()">🗣️ اجازه صحبت</button>
+<button class="control-btn" style="border-color:#e74c3c;color:#e74c3c;" onclick="modBlockSpeech()">🔇 قطع صحبت</button>
+<button class="control-btn" style="border-color:#8e44ad;color:#8e44ad;" onclick="modDisciplinaryMute()">⚠️ سکوت انضباطی</button>
+<button class="control-btn" style="border-color:#27ae60;color:#27ae60;" onclick="modRemoveDisciplinaryMute()">✅ رفع سکوت انضباطی</button>
+</div>
+</div>
+
+<div style="background:#eef7ff;border:1px solid #3498db;border-radius:9px;padding:8px;margin:7px 0;">
+<div style="font-size:12px;text-align:center;font-weight:700;margin-bottom:6px;">🗳️ حق رأی و ⚡ ابلیتی</div>
+<div class="mod-action-grid">
+<button class="control-btn" style="border-color:#e74c3c;color:#e74c3c;" onclick="modTakeVote()">🚫 گرفتن حق رأی</button>
+<button class="control-btn" style="border-color:#27ae60;color:#27ae60;" onclick="modRestoreVote()">🗳️ برداشتن محدودیت رأی</button>
+<button class="control-btn" style="border-color:#e67e22;color:#e67e22;" onclick="modTakeAbility()">⚡ گرفتن ابلیتی</button>
+<button class="control-btn" style="border-color:#27ae60;color:#27ae60;" onclick="modRestoreAbility()">✨ برداشتن محدودیت ابلیتی</button>
+</div>
+</div>
+
+<div style="background:#fff0f0;border:1px solid #e74c3c;border-radius:9px;padding:8px;margin:7px 0;">
+<div style="font-size:12px;text-align:center;font-weight:700;margin-bottom:6px;">🚫 پنل بن</div>
+<div class="control-row">
+<input id="moderationUserCode" type="text" placeholder="کد کاربری شخص" style="flex:1;padding:7px;border-radius:7px;border:1px solid #ccc;">
+</div>
+<div class="control-row">
+<button class="control-btn" onclick="modBanSystem(1)">بن ۱ روز</button>
+<button class="control-btn" onclick="modBanSystem(3)">بن ۳ روز</button>
+<button class="control-btn" onclick="modBanSystem(5)">بن ۵ روز</button>
+<button class="control-btn" onclick="modBanSystem(7)">بن ۷ روز</button>
+<button class="control-btn" onclick="modBanSystem(30)">بن ۳۰ روز</button>
+<button class="control-btn" style="background:#e74c3c;color:#fff;" onclick="modBanSystem('permanent')">⛔ دائم</button>
+</div>
+<div class="control-row">
+<input id="moderationCustomBan" type="number" min="1" placeholder="بن دلخواه: تعداد روز" style="flex:1;padding:7px;border-radius:7px;border:1px solid #ccc;">
+<button class="control-btn" onclick="modBanCustom()">بن دلخواه</button>
+<button class="control-btn" style="border-color:#27ae60;color:#27ae60;" onclick="modUnbanByCode()">✅ برداشتن بن</button>
+</div>
+</div>
+
+<div style="background:#f5efff;border:1px solid #9b59b6;border-radius:9px;padding:8px;margin:7px 0;">
+<div style="font-size:12px;text-align:center;font-weight:700;margin-bottom:6px;">👑 مقام‌های مجاز نظارت</div>
+<div class="mod-status">🛡️ تیم ناظر | 👑 ناظر ارشد | 🔧 ادمین تیم | 👑 ادمین ارشد تیم | ⭐ کاربر ویژه | 👑 سازنده</div>
+</div>
+</div>
+<div class="game-phase-box" id="rankedGamePhaseBox">
+<h3 id="rankedGamePhaseTitle">🌙 شب معارفه</h3>
+<p id="rankedGamePhaseInfo">ابلیتی‌ها قفل هستند</p>
+<div class="game-timer" id="rankedGameTimerDisplay">-</div>
+<p class="speaking-indicator" id="rankedSpeakingIndicator"></p>
+</div>
+<div id="rankedAbilityArea"></div>
+<div id="rankedVoteArea"></div>
+<div id="rankedDefenseArea"></div>
+<div class="seats-grid" id="rankedGameSeatsBox"></div>
+<div id="rankedEndGameArea"></div>
+</div>
+</div>
+</div>
+
+<div class="panel">
+<h3 class="panel-title">👑 پنل نظارت</h3>
+<div class="panel-section">
+<h4>⛔ جریمه</h4>
+<select class="player-select" id="penaltySelect"><option value="">انتخاب...</option></select>
+<div class="ban-options">
+<button class="ban-btn" onclick="penalize(1)">۱</button>
+<button class="ban-btn" onclick="penalize(24)">۲۴</button>
+<button class="ban-btn" onclick="penalize(48)">۴۸</button>
+<button class="ban-btn" style="background:#27ae60;color:white;" onclick="unpenalize()">✅ برداشتن</button>
+</div>
+</div>
+<div class="panel-section">
+<h4>🚫 بن</h4>
+<select class="player-select" id="banSelect"><option value="">انتخاب...</option></select>
+<div class="ban-options">
+<button class="ban-btn" onclick="ban(1)">۱</button>
+<button class="ban-btn" onclick="ban(7)">۷</button>
+<button class="ban-btn" onclick="ban(30)">۳۰</button>
+<button class="ban-btn" style="background:#e74c3c;color:white;" onclick="ban('permanent')">⛔ دائم</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="notification" id="notif"></div>
+<div class="modal" id="roleModal"><div class="modal-content"><h2 id="modalRoleName">🎭 نقش</h2><div class="role-desc" id="modalRoleDesc"></div><button class="close-btn" onclick="closeRoleModal()">بستن</button></div></div>
+<div id="siteAdminPanel" class="modal" aria-hidden="true"></div>
+<div id="profileModal" class="modal" aria-hidden="true"></div>
+<div id="avatarShopModal" class="modal" aria-hidden="true"></div>
+<div id="clanModal" class="modal" aria-hidden="true"></div><script>
+var coins = 3000;var banList = {};
+var moderatorSilenced = {};
+var moderatorAbilityDisabled = {};
+var moderatorVoteDisabled = {};
+var moderatorMicBlocked = {};
+var allMicsBlocked = false;
+var gems = 0;
+var ownerCoins = 100000000;
+var ownerGems = 100000000;
+var moderatorCoins = 100000;
+var moderatorGems = 100000;
+var myLobby = null;
+var mySeatIndex = 0;
+var isOwner = true;
+var isSiteAdmin = false;
+var SITE_ADMIN_EMAIL = 'admin@mafiashadow.local';
+var isModerator = false;
+var moderatorCount = 0;
+var lobbies = [];
+var selectedScenario = 'detective';
+var selectedLocation = 'default';
+var seatLayout = 'classic';
+var blacklistedPlayers = [];
+var lockedMicPlayers = [];
+var globalMicLock = false;
+var rankedModeration = {
+  speechBlocked: {},
+  disciplinaryMute: {},
+  voteRemoved: {},
+  abilityRemoved: {},
+  bans: {}
+};
+var moderatorNoticeBlink = true;
+var chatLocked = false;
+var emojiLocked = false;
+
+var entryPaid = false;
+var myPenaltyHours = 0;
+var samplePlayers = ['علی','محمد','رضا','حسین','مهدی','سارا','مریم','فاطمه','زهرا','نرگس'];
+var playerRoles = {};
+var alivePlayers = [];
+var deadPlayers = [];
+var defendingPlayers = [];
+var votes = {};
+var playerPoints = {};
+var myRole = '';
+var searchInterval = null;
+var foundPlayers = 0;
+var phaseTimerInterval = null;
+var currentSpeakerIndex = 0;
+var speakTimer = 30;
+var winner = null;
+var mvp = null;
+var currentNightNumber = 0;
+var currentDayNumber = 1;
+var gamePaused = false;
+var currentVoterIndex = 0;
+var voteTimer = 15;
+var defenseTimer = 15;
+var currentDefenderIndex = 0;
+var nightAbilityLocked = false;
+var myAbilityUsedThisNight = false;
+var savedPlayersThisNight = [];
+var deadPlayersThisNight = [];
+var negotiatorUsed = false;
+var natoUsed = false;
+var investigatorLinkedTo = null;
+var tankUsed = false;
+var sniperUsed = false;
+var guardSavedPlayers = [];
+var doctorSelfSavesLeft = 2;
+var doctorSavesLeft = 2;
+var detectivePicks = [];
+var timeChallenge = 60;
+var timeSpeak = 60;
+var timeKS = 200;
+var timeCitizenNight = 60;
+var timeMafiaNight = 60;
+var rankedIntroDayTime = 30;
+var rankedIntroNightTime = 30;
+var ksActive = false;
+var dayChallengeDone = false;
+var isRanked = false;
+var currentUserName = '';
+var currentUserEmail = '';
+var currentUserAge = '';
+var currentUserBirth = '';
+var currentUserCode = '';
+var currentUserLevel = 1;
+try { currentUserLevel = Math.max(1, parseInt(localStorage.getItem('msh_level_' + (currentUserName || '')), 10) || 1); } catch(e) { currentUserLevel = 1; }
+var yakuActive = false;
+var yakuUsedOnce = false;
+var accuserSet = null;
+var defenderSet = null;
+var gunnerUsed = false;
+var gunnerTarget = null;
+var tankCanShoot = false;
+var messageLikes = {};
+var messageDislikes = {};
+var tricksterTarget = null;
+var guardProtectedPlayers = [];
+var hostageGrabbedPlayers = [];
+var gunnerShootActive = false;
+var gunnerShootTarget = null;
+var moderatorState = {};
+var moderatorUserCodes = {};
+var userRanks = {};
+var rankLabels = {
+  'user':'کاربر عادی',
+  'special':'کاربر ویژه',
+  'moderator':'تیم ناظر',
+  'senior_moderator':'ناظر ارشد',
+  'team_admin':'ادمین تیم',
+  'senior_team_admin':'ادمین ارشد تیم'
+};
+
+var rankLevels = {
+  'user': 0,
+  'special': 1,
+  'moderator': 2,
+  'senior_moderator': 3,
+  'team_admin': 4,
+  'senior_team_admin': 5
+};
+
+function getMyPermissionLevel() {
+  if (isOwner) return 999;
+  var r = userRanks[currentUserName] || (isModerator ? 'moderator' : 'user');
+  return rankLevels[r] || 0;
+}
+
+function canManageRanks() {
+  return isOwner || isModerator || getMyPermissionLevel() >= rankLevels.team_admin;
+}
+
+function setUserRank(target, rank) {
+  if (!canManageRanks()) {
+    notify('❌ فقط سازنده یا تیم ناظر می‌تواند مقام بدهد', 'error');
+    return;
+  }
+  if (!target || target === 'خالی' || target === 'شما') {
+    notify('❌ ابتدا یک بازیکن دیگر را انتخاب کنید', 'error');
+    return;
+  }
+  if (target === myLobby.owner) {
+    notify('❌ مقام سازنده قابل تغییر نیست', 'error');
+    return;
+  }
+
+  var myLevel = getMyPermissionLevel();
+  var targetRank = userRanks[target] || 'user';
+  var targetLevel = rankLevels[targetRank] || 0;
+  var newLevel = rankLevels[rank] || 0;
+
+  if (!isOwner && (newLevel >= myLevel || targetLevel >= myLevel)) {
+    notify('❌ نمی‌توانید مقام هم‌سطح یا بالاتر از خودتان را تغییر دهید', 'error');
+    return;
+  }
+
+  userRanks[target] = rank;
+  var assignedCode = regenerateUserCodeForRank(target, rank);
+  if (rank === 'moderator' || rank === 'senior_moderator') {
+    moderatorState[target] = moderatorState[target] || {};
+    moderatorState[target].isModerator = true;
+    moderatorState[target].rank = rank;
+    if (!myLobby.moderators) myLobby.moderators = [];
+    if (myLobby.moderators.indexOf(target) === -1 && myLobby.moderators.length < 2) {
+      myLobby.moderators.push(target);
+    }
+    moderatorCount = myLobby.moderators.length;
+  } else if (moderatorState[target]) {
+    moderatorState[target].isModerator = false;
+    delete moderatorState[target].rank;
+    if (myLobby.moderators) {
+      myLobby.moderators = myLobby.moderators.filter(function(n) { return n !== target; });
+      moderatorCount = myLobby.moderators.length;
+    }
+  }
+
+  notify('✅ ' + target + ' به مقام «' + rankLabels[rank] + '» رسید', 'success');
+  renderRoom();
+}
+
+function removeUserRank() {
+  var sel = document.getElementById('playerSelect');
+  var idx = parseInt(sel && sel.value);
+  if (isNaN(idx) || !myLobby || !myLobby.seats[idx]) {
+    notify('❌ ابتدا یک بازیکن را انتخاب کنید', 'error');
+    return;
+  }
+  var target = myLobby.seats[idx];
+  if (!isOwner && !canManageRanks()) {
+    notify('❌ دسترسی کافی ندارید', 'error');
+    return;
+  }
+  if (target === myLobby.owner || target === 'شما') {
+    notify('❌ مقام سازنده قابل عزل نیست', 'error');
+    return;
+  }
+
+  var current = userRanks[target] || 'user';
+  var myLevel = getMyPermissionLevel();
+  if (!isOwner && (rankLevels[current] || 0) >= myLevel) {
+    notify('❌ نمی‌توانید مقام هم‌سطح یا بالاتر از خودتان را عزل کنید', 'error');
+    return;
+  }
+
+  userRanks[target] = 'user';
+  if (moderatorState[target]) {
+    moderatorState[target].isModerator = false;
+    delete moderatorState[target].rank;
+  }
+  if (myLobby.moderators) {
+    myLobby.moderators = myLobby.moderators.filter(function(n) { return n !== target; });
+    moderatorCount = myLobby.moderators.length;
+  }
+  notify('⬇️ مقام ' + target + ' به کاربر عادی برگشت', 'warning');
+  renderRoom();
+}
+
+var roleDescriptions = {
+  'پزشک': '🧑🏻‍⚕️ هر شب یک نفر را از شلیک مافیا نجات می‌دهی.',
+  'کارآگاه': '🕵🏻 هر شب استعلام یک نفر را می‌گیری. استعلام رئیس منفی است.',
+  'بازپرس': '🔍 یک بار در بازی دو نفر را به دفاعیه می‌آوری.',
+  'محقق': '🕵🏻 هر شب خودت را به یک نفر گره می‌زنی. اگر خارج شوی، او هم خارج می‌شود.',
+  'رویین تن': '🛡️ در شب نامیرا هستی.',
+  'ناتو': '💣 یک بار در بازی نقش یک شهروند نقش‌دار را حدس می‌زنی.',
+  'شیاد': '🎭 هر شب به یک نفر می‌زنی. استعلام کارآگاه برای او منفی می‌شود.',
+  'تکاور': '⚔️ فقط وقتی مافیا تو را کشته باشد، شلیک می‌کنی.',
+  'نگهبان': '🛡️ هر شب از یک نفر در برابر گروگان‌گیر محافظت می‌کنی.',
+  'تفنگدار': '🔫 هر شب یک تفنگ به یک نفر می‌دهی. فشنگ جنگی به خودت نمی‌دهی.',
+  'گروگان‌گیر': '🎭 هر شب یک شهروند را گروگان می‌گیری.',
+  'مذاکره‌کننده': '🤝 اگر دو مافیا خارج شوند، یک بار شهروند جذب می‌کنی.',
+  'زره پوش': '🛡️ شب‌ها در برابر شلیک مقاوم هستی. یک بار در روز خارج نمی‌شوی.',
+  'خبرنگار': '📰 بعد از یاکوزایی، استعلام یک نفر را می‌گیری.',
+  'تک تیرانداز': '🎯 یک بار در بازی شلیک می‌کنی.',
+  'رئیس مافیا': '👑 شلیک شب به دست توست. با یاکوزایی شهروند جذب می‌کنی.',
+  'مافیا': '👤 به رئیس مشورت می‌دهی.',
+  'شهروند': '🏙️ شب نقش خاصی نداری.'
+};
+
+function notify(msg, color) {
+  var n = document.getElementById('notif');
+  n.textContent = msg;
+  n.className = 'notification ' + color;
+  n.style.display = 'block';
+  setTimeout(function() { n.style.display = 'none'; }, 3000);
+}
+
+function updateCoinDisplay() {
+  if (isOwner) {
+    document.getElementById('coins').textContent = ownerCoins;
+    document.getElementById('gems').textContent = ownerGems;
+  } else if (isModerator) {
+    document.getElementById('coins').textContent = moderatorCoins;
+    document.getElementById('gems').textContent = moderatorGems;
+  } else {
+    document.getElementById('coins').textContent = coins;
+    document.getElementById('gems').textContent = gems;
+  }
+}
+
+function showRoleInfo() {
+  if (!myRole || myRole === '') { notify('❌ هنوز بازی شروع نشده', 'error'); return; }
+  document.getElementById('modalRoleName').textContent = '🎭 نقش شما: ' + myRole;
+  document.getElementById('modalRoleDesc').textContent = roleDescriptions[myRole] || 'توضیحی موجود نیست';
+  document.getElementById('roleModal').classList.add('active');
+}
+
+function closeRoleModal() { document.getElementById('roleModal').classList.remove('active'); }
+
+function isCurrentSiteAdmin() {
+  return !!isSiteAdmin && (currentUserEmail || '').toLowerCase() === SITE_ADMIN_EMAIL.toLowerCase();
+}
+
+// اطلاعات خصوصی سازنده سایت فقط برای خودش قابل نمایش است.
+function canViewSiteOwnerPrivateInfo() {
+  return isCurrentSiteAdmin();
+}
+
+function privateOwnerValue(value) {
+  return canViewSiteOwnerPrivateInfo() ? (value || '---') : '---';
+}
+
+function getUserCodeRole(rank) {
+  if (rank === 'senior_moderator' || rank === 'team_admin' || rank === 'senior_team_admin') return 'special_moderator';
+  if (rank === 'moderator') return 'moderator';
+  return 'user';
+}
+
+function generateUserCode(rank, forceNew) {
+  if (isOwner) return '1';
+  var role = getUserCodeRole(rank || userRanks[currentUserName] || 'user');
+  var min = role === 'special_moderator' ? 700000 : role === 'moderator' ? 400000 : 100000;
+  var max = role === 'special_moderator' ? 999999 : role === 'moderator' ? 699999 : 399999;
+  var users = [];
+  try { users = JSON.parse(localStorage.getItem('msh_users') || '[]'); } catch (e) { users = []; }
+  var used = {};
+  users.forEach(function(u){ if (u && u.code) used[String(u.code)] = true; });
+  if (!forceNew && currentUserCode && !used[String(currentUserCode)]) return String(currentUserCode);
+  var code = '';
+  for (var i = 0; i < 100; i++) {
+    code = String(Math.floor(min + Math.random() * (max - min + 1)));
+    if (!used[code]) return code;
+  }
+  return String(min + Math.floor(Math.random() * (max - min + 1)));
+}
+
+function regenerateUserCodeForRank(target, rank) {
+  var newCode = generateUserCode(rank, true);
+  var users = [];
+  try { users = JSON.parse(localStorage.getItem('msh_users') || '[]'); } catch (e) { users = []; }
+  var found = false;
+  for (var i = 0; i < users.length; i++) {
+    if (users[i] && users[i].name === target) {
+      users[i].code = newCode;
+      found = true;
+      break;
+    }
+  }
+  if (!found) users.push({name: target, code: newCode});
+  try { localStorage.setItem('msh_users', JSON.stringify(users)); } catch (e) {}
+  return newCode;
+}
+
+function copyMyUserCode() {
+  var code = currentUserCode || '---';
+  if (code === '---') { notify('❌ کد کاربری موجود نیست', 'error'); return; }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(String(code)).then(function(){ notify('📋 کد کاربری کپی شد: ' + code, 'success'); }).catch(function(){ fallbackCopyUserCode(code); });
+  } else { fallbackCopyUserCode(code); }
+}
+
+function fallbackCopyUserCode(code) {
+  var ta = document.createElement('textarea');
+  ta.value = String(code);
+  ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); notify('📋 کد کاربری کپی شد: ' + code, 'success'); }
+  catch (e) { notify('❌ کپی خودکار انجام نشد؛ کد: ' + code, 'error'); }
+  document.body.removeChild(ta);
+}
+
+function saveRegisteredUser() {
+  var users = [];
+  try { users = JSON.parse(localStorage.getItem('msh_users') || '[]'); } catch (e) { users = []; }
+  var rec = {
+    name: currentUserName,
+    email: currentUserEmail,
+    age: currentUserAge,
+    birth: currentUserBirth,
+    code: currentUserCode
+  };
+  var found = false;
+  for (var i = 0; i < users.length; i++) {
+    if ((users[i].email || '').toLowerCase() === currentUserEmail.toLowerCase()) {
+      users[i] = rec; found = true; break;
+    }
+  }
+  if (!found) users.push(rec);
+  try { localStorage.setItem('msh_users', JSON.stringify(users)); } catch (e) {}
+}
+
+function getUserLevel(name) {
+  name = name || currentUserName || 'شما';
+  var levels = {};
+  try { levels = JSON.parse(localStorage.getItem('msh_user_levels') || '{}'); } catch(e) { levels = {}; }
+  var n = parseInt(levels[name], 10);
+  if (!isFinite(n) || n < 1) n = 1;
+  return n;
+}
+function setUserLevel(name, level) {
+  if (!name) return;
+  var n = parseInt(level, 10); if (!isFinite(n) || n < 1) n = 1;
+  var levels = {}; try { levels = JSON.parse(localStorage.getItem('msh_user_levels') || '{}'); } catch(e) {}
+  levels[name] = n; localStorage.setItem('msh_user_levels', JSON.stringify(levels));
+}
+
+function getPublicUserInfo(user) {
+  user = user || {};
+  return { name: user.name || '', code: user.code || '', level: getUserLevel(user.name || '') };
+}
+
+function canViewPrivateUserInfo() {
+  // اطلاعات خصوصی فقط برای خودِ کاربر در پروفایل خودش
+  // و برای سازنده سایت در پنل مدیریت اصلی قابل مشاهده است.
+  return isCurrentSiteAdmin();
+}
+
+function getPrivateProfileInfo() {
+  return {
+    name: currentUserName || 'کاربر',
+    email: currentUserEmail || '---',
+    age: currentUserAge || '---',
+    birth: currentUserBirth || '---',
+    code: currentUserCode || '---'
+  };
+}
+
+
+// حریم خصوصی: کاربران عادی و ناظران فقط نام کاربری و کد کاربری را می‌بینند.
+function renderPublicUserInfo(user) {
+  var p = getPublicUserInfo(user);
+  return '<strong>👤 نام کاربری:</strong> ' + p.name + '<br><strong>🔑 کد کاربری:</strong> ' + p.code + '<br><strong>⭐ سطح:</strong> ' + p.level;
+}
+
+function openSiteAdminPanel() {
+  if (!isCurrentSiteAdmin()) {
+    notify('❌ فقط سازنده سایت به اطلاعات ثبت‌نامی دسترسی دارد', 'error');
+    return;
+  }
+  var users = [];
+  try { users = JSON.parse(localStorage.getItem('msh_users') || '[]'); } catch (e) { users = []; }
+  var h = '<div class="modal-content">';
+  h += '<h2>👑 مدیریت اصلی سایت</h2>';
+  h += '<div class="role-desc"><strong>🔒 اطلاعات خصوصی کاربران</strong><br>این بخش فقط برای سازنده سایت است. ناظر و کاربر عادی، حتی اطلاعات خصوصی سازنده سایت را هم مشاهده نمی‌کنند.</div>';
+  if (!users.length) {
+    h += '<div class="role-desc">هنوز کاربری ثبت‌نام نکرده است.</div>';
+  } else {
+    users.forEach(function(u, i) {
+      var r = userRanks[u.name] || ((moderatorState[u.name] && moderatorState[u.name].rank) || 'user');
+      var roleText = r === 'user' ? 'کاربر عادی' : (rankLabels[r] || r);
+      h += '<div class="role-desc" style="margin-bottom:10px;">';
+      h += '<strong>👤 کاربر ' + (i + 1) + '</strong><br>';
+      h += 'نام کاربری: ' + (u.name || '---') + '<br>';
+      h += '🏷️ مقام: ' + roleText + '<br>';
+      h += '📧 ایمیل: ' + (u.email || '---') + '<br>';
+      h += '🎂 سن: ' + (u.age || '---') + '<br>';
+      h += '📅 تاریخ تولد: ' + (u.birth || '---') + '<br>';
+      h += '🆔 کد کاربری: ' + (u.code || '---');
+      h += '</div>';
+    });
+  }
+
+  var moderators = [];
+  for (var mn in userRanks) {
+    if (userRanks[mn] === 'moderator' || userRanks[mn] === 'senior_moderator') moderators.push(mn);
+  }
+  for (var sn in moderatorState) {
+    if (moderatorState[sn] && moderatorState[sn].isModerator && moderators.indexOf(sn) === -1) moderators.push(sn);
+  }
+  if (myLobby && myLobby.moderators) {
+    myLobby.moderators.forEach(function(mn) { if (moderators.indexOf(mn) === -1) moderators.push(mn); });
+  }
+  h += '<div class="role-desc" style="margin-top:12px;">';
+  h += '<strong>🛡️ ناظران سایت/لابی</strong><br>';
+  if (!moderators.length) {
+    h += 'در حال حاضر ناظری ثبت نشده است.';
+  } else {
+    moderators.forEach(function(mn, mi) {
+      var mr = userRanks[mn] || (moderatorState[mn] && moderatorState[mn].rank) || 'moderator';
+      h += (mi + 1) + '. ' + mn + ' — ' + (rankLabels[mr] || 'تیم ناظر') + '<br>';
+    });
+  }
+  h += '</div>';
+  h += '<button class="btn btn-red" style="width:100%;" onclick="closeSiteAdminPanel()">بستن</button>';
+  h += '</div>';
+  document.getElementById('siteAdminPanel').innerHTML = h;
+  document.getElementById('siteAdminPanel').classList.add('active');
+}
+
+function closeSiteAdminPanel() {
+  var p = document.getElementById('siteAdminPanel');
+  if (p) p.classList.remove('active');
+}
+
+function register() {
+  var email = document.getElementById('regEmail').value.trim().toLowerCase();
+  var user = document.getElementById('regUser').value.trim();
+  var age = document.getElementById('regAge').value.trim();
+  var birth = document.getElementById('regBirth').value;
+  var emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  if (!email || !user || !age || !birth) { alert('همه موارد را پر کنید'); return; }
+  if (!emailOk) { alert('ایمیل معتبر نیست'); return; }
+  if (!/^[0-9]{1,3}$/.test(age) || Number(age) < 13 || Number(age) > 120) { alert('سن باید بین ۱۳ تا ۱۲۰ سال باشد'); return; }
+  currentUserName = user;
+  currentUserEmail = email;
+  currentUserAge = age;
+  currentUserBirth = birth;
+  currentUserCode = isOwner ? '1' : generateUserCode('user', false);
+  isSiteAdmin = currentUserEmail.toLowerCase() === SITE_ADMIN_EMAIL.toLowerCase();
+  try {
+    localStorage.setItem('msh_profile', JSON.stringify({
+      name: currentUserName,
+      email: currentUserEmail,
+      age: currentUserAge,
+      birth: currentUserBirth,
+      code: currentUserCode
+    }));
+  } catch (e) {}
+  saveRegisteredUser();
+  document.getElementById('registerBox').style.display = 'none';
+  document.getElementById('gameBox').style.display = 'block';
+  updateCoinDisplay();
+  notify('✅ ثبت نام با موفقیت انجام شد؛ خوش آمدید ' + currentUserName, 'success');
+}
+
+function showLogin() { document.getElementById('registerBox').style.display = 'none'; document.getElementById('loginBox').style.display = 'block'; }
+function showRegister() { document.getElementById('loginBox').style.display = 'none'; document.getElementById('registerBox').style.display = 'block'; }
+
+function login() {
+  var email = document.getElementById('loginEmail').value.trim().toLowerCase();
+  var user = document.getElementById('loginUser').value.trim();
+  if (!email || !user) { alert('ایمیل و نام کاربری را وارد کنید'); return; }
+  var emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  if (!emailOk) { alert('ایمیل معتبر نیست'); return; }
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem('msh_profile') || 'null'); } catch (e) {}
+  if (!saved || saved.email !== email || saved.name !== user) {
+    alert('❌ ایمیل یا نام کاربری صحیح نیست');
+    return;
+  }
+  currentUserName = saved.name || user;
+  currentUserEmail = saved.email || email;
+  currentUserAge = saved.age || '';
+  currentUserBirth = saved.birth || '';
+  currentUserCode = saved.code || (isOwner ? '1' : '---');
+  isSiteAdmin = currentUserEmail.toLowerCase() === SITE_ADMIN_EMAIL.toLowerCase();
+  document.getElementById('loginBox').style.display = 'none';
+  document.getElementById('gameBox').style.display = 'block';
+  updateCoinDisplay();
+  notify('✅ خوش آمدید ' + currentUserName, 'success');
+}
+
+function toggleMic() {
+  var myRank = userRanks['شما'] || '';
+  var isModRank = (myRank === 'moderator' || myRank === 'senior_moderator');
+
+  if (globalMicLock && !isOwner && !isModerator && !isModRank) {
+    notify('🔒 میکروفون همه توسط سازنده قفل شده است', 'warning');
+    return;
+  }
+
+  if (lockedMicPlayers.indexOf('شما') !== -1 && !isOwner && !isModerator && !isModRank) {
+    notify('🔒 میکروفون شما توسط سازنده قفل شده است', 'warning');
+    return;
+  }
+
+  var b = document.querySelector('.mic-btn');
+  if (!b) return;
+  if (b.classList.contains('mic-on')) { b.classList.remove('mic-on'); b.classList.add('mic-off'); b.textContent = '🔇'; notify('🔇 میکروفون بسته شد', 'warning'); }
+  else { b.classList.remove('mic-off'); b.classList.add('mic-on'); b.textContent = '🎤'; notify('🎤 میکروفون باز شد', 'success'); }
+}
+
+function showTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
+  document.querySelectorAll('.tab-content').forEach(function(c){c.classList.remove('active');});
+  if (tab === 'friendly') { document.querySelectorAll('.tab-btn')[0].classList.add('active'); document.getElementById('friendlyContent').classList.add('active'); }
+  else { document.querySelectorAll('.tab-btn')[1].classList.add('active'); document.getElementById('rankedContent').classList.add('active'); }
+}
+
+function pickScenario(s) {
+  selectedScenario = s;
+  var names = {detective:'بازپرس', commando:'تکاور', negotiator:'مذاکره'};
+  document.getElementById('selectedScenarioText').textContent = 'سناریو: ' + names[s];
+  notify('سناریو: ' + names[s], 'success');
+}
+
+function saveTimes() {
+  timeChallenge = parseInt(document.getElementById('timeChallenge').value) || 60;
+  timeSpeak = parseInt(document.getElementById('timeSpeak').value) || 60;
+  timeKS = parseInt(document.getElementById('timeKS').value) || 200;
+  timeCitizenNight = parseInt(document.getElementById('timeCitizenNight').value) || 60;
+  timeMafiaNight = parseInt(document.getElementById('timeMafiaNight').value) || 60;
+  notify('⏱️ زمان‌ها ذخیره شد!', 'success');
+}
+
+function saveRankedTimes() {
+  function readRankedTime(id, fallback) {
+    var el = document.getElementById(id);
+    var n = el ? parseInt(el.value, 10) : fallback;
+    return isFinite(n) && n >= 1 ? n : fallback;
+  }
+  rankedIntroDayTime = readRankedTime('rankedIntroDay', 30);
+  rankedIntroNightTime = readRankedTime('rankedIntroNight', 30);
+  timeMafiaNight = readRankedTime('rankedTimeMafia', 60);
+  timeCitizenNight = readRankedTime('rankedTimeCitizen', 60);
+  timeSpeak = readRankedTime('rankedTimeSpeak', 60);
+  timeChallenge = readRankedTime('rankedTimeChallenge', 60);
+  document.getElementById('rankedIntroDay').value = rankedIntroDayTime;
+  document.getElementById('rankedIntroNight').value = rankedIntroNightTime;
+  document.getElementById('rankedTimeMafia').value = timeMafiaNight;
+  document.getElementById('rankedTimeCitizen').value = timeCitizenNight;
+  document.getElementById('rankedTimeSpeak').value = timeSpeak;
+  document.getElementById('rankedTimeChallenge').value = timeChallenge;
+  notify('⏱️ ۶ زمان حالت امتیازی ذخیره شد!', 'success');
+}
+
+// ============ سیستم آواتار ============
+var myAvatar = 'avatars/avatar1.png';
+var myGems = 0;
+var ownedAvatars = [1, 2, 3, 4, 5, 6];
+
+var allAvatars = [
+  { id: 1, file: 'avatar1.png', name: 'آقا ۱', price: 0, type: 'free' },
+  { id: 2, file: 'avatar2.png', name: 'آقا ۲', price: 0, type: 'free' },
+  { id: 3, file: 'avatar3.png', name: 'آقا ۳', price: 0, type: 'free' },
+  { id: 4, file: 'avatar4.png', name: 'خانم ۱', price: 0, type: 'free' },
+  { id: 5, file: 'avatar5.png', name: 'خانم ۲', price: 0, type: 'free' },
+  { id: 6, file: 'avatar6.png', name: 'خانم ۳', price: 0, type: 'free' },
+  { id: 7, file: 'avatar7.png', name: 'پولی ۱', price: 200, type: 'paid' },
+  { id: 8, file: 'avatar8.png', name: 'پولی ۲', price: 250, type: 'paid' },
+  { id: 9, file: 'avatar9.png', name: 'پولی ۳', price: 300, type: 'paid' },
+  { id: 10, file: 'avatar10.png', name: 'پولی ۴', price: 350, type: 'paid' },
+  { id: 11, file: 'avatar11.png', name: 'پولی ۵', price: 400, type: 'paid' },
+  { id: 12, file: 'avatar12.png', name: 'پولی ۶', price: 450, type: 'paid' },
+  { id: 13, file: 'avatar13.png', name: 'پولی ۷', price: 500, type: 'paid' },
+  { id: 14, file: 'avatar14.png', name: 'پولی ۸', price: 550, type: 'paid' },
+  { id: 15, file: 'avatar15.png', name: 'پولی ۹', price: 600, type: 'paid' },
+  { id: 16, file: 'avatar16.png', name: 'پولی ۱۰', price: 650, type: 'paid' },
+  { id: 17, file: 'avatar17.png', name: 'پولی ۱۱', price: 700, type: 'paid' },
+  { id: 18, file: 'avatar18.png', name: 'پولی ۱۲', price: 750, type: 'paid' },
+  { id: 19, file: 'avatar19.png', name: 'پولی ۱۳', price: 800, type: 'paid' },
+  { id: 20, file: 'avatar20.png', name: 'پولی ۱۴', price: 850, type: 'paid' },
+  { id: 21, file: 'avatar21.png', name: 'پولی ۱۵', price: 900, type: 'paid' },
+  { id: 22, file: 'avatar22.png', name: 'پولی ۱۶', price: 950, type: 'paid' },
+  { id: 23, file: 'avatar23.png', name: 'پولی ۱۷', price: 1000, type: 'paid' },
+  { id: 24, file: 'avatar24.png', name: 'پولی ۱۸', price: 1100, type: 'paid' },
+  { id: 25, file: 'avatar25.png', name: 'پولی ۱۹', price: 1200, type: 'paid' },
+  { id: 26, file: 'avatar26.png', name: 'پولی ۲۰', price: 1300, type: 'paid' },
+  { id: 27, file: 'avatar27.png', name: 'پولی ۲۱', price: 1400, type: 'paid' },
+  { id: 28, file: 'avatar28.png', name: 'پولی ۲۲', price: 1500, type: 'paid' },
+  { id: 29, file: 'avatar29.png', name: 'پولی ۲۳', price: 1600, type: 'paid' },
+  { id: 30, file: 'avatar30.png', name: 'پولی ۲۴', price: 1700, type: 'paid' },
+  { id: 31, file: 'avatar31.png', name: 'پولی ۲۵', price: 1800, type: 'paid' },
+  { id: 32, file: 'avatar32.png', name: 'پولی ۲۶', price: 1900, type: 'paid' },
+  { id: 33, file: 'avatar33.png', name: 'پولی ۲۷', price: 2000, type: 'paid' },
+  { id: 34, file: 'avatar34.png', name: 'پولی ۲۸', price: 100, type: 'paid' },
+  { id: 35, file: 'avatar35.png', name: 'پولی ۲۹', price: 150, type: 'paid' },
+  { id: 36, file: 'avatar36.png', name: 'پولی ۳۰', price: 200, type: 'paid' },
+  { id: 37, file: 'avatar37.png', name: 'پولی ۳۱', price: 250, type: 'paid' },
+  { id: 38, file: 'avatar38.png', name: 'پولی ۳۲', price: 300, type: 'paid' },
+  { id: 39, file: 'avatar39.png', name: 'پولی ۳۳', price: 350, type: 'paid' },
+  { id: 40, file: 'avatar40.png', name: 'پولی ۳۴', price: 400, type: 'paid' },
+  { id: 41, file: 'avatar41.png', name: 'پولی ۳۵', price: 450, type: 'paid' },
+  { id: 42, file: 'avatar42.png', name: 'پولی ۳۶', price: 500, type: 'paid' },
+  { id: 43, file: 'avatar43.png', name: 'پولی ۳۷', price: 550, type: 'paid' },
+  { id: 44, file: 'avatar44.png', name: 'پولی ۳۸', price: 600, type: 'paid' },
+  { id: 45, file: 'avatar45.png', name: 'پولی ۳۹', price: 650, type: 'paid' },
+  { id: 46, file: 'avatar46.png', name: 'پولی ۴۰', price: 700, type: 'paid' },
+  { id: 47, file: 'avatar47.png', name: 'پولی ۴۱', price: 750, type: 'paid' },
+  { id: 48, file: 'avatar48.png', name: '💪 مرد باشگاهی', price: 900, type: 'creator' },
+  { id: 49, file: 'avatar49.png', name: '🎩 مرد سالخورده', price: 1600, type: 'creator' },
+  { id: 50, file: 'avatar50.png', name: '👑 پادشاه', price: 1900, type: 'creator' },
+  { id: 51, file: 'avatar51.png', name: '🎭 مخصوص ناظران', price: 5000, type: 'moderator' },
+  { id: 52, file: 'avatar52.png', name: '🤡 جوکر ویژه', price: 10000, type: 'joker' }
+];
+
+function getAvatarById(id) {
+  for (var i = 0; i < allAvatars.length; i++) {
+    if (allAvatars[i].id === id) return allAvatars[i];
+  }
+  return allAvatars[0];
+}
+
+function getAvatarImage(id) {
+  var a = getAvatarById(id);
+  return a ? 'avatars/' + a.file : 'avatars/avatar1.png';
+}
+
+function getAvatarPrice(a) {
+  if (a.type === 'free') return 0;
+  if (a.type === 'creator' && isOwner) return 0;
+  if (a.type === 'moderator' && isModerator) return 0;
+  if (a.type === 'joker' && isOwner) return 0;
+  return a.price;
+}
+
+function canBuyAvatar(a) {
+  if (a.type === 'free') return true;
+  if (isOwner && (a.type === 'creator' || a.type === 'joker')) return true;
+  if (isModerator && a.type === 'moderator') return true;
+  return (isOwner ? ownerGems : isModerator ? moderatorGems : myGems) >= a.price;
+}
+
+function ensureProfileModals() {
+  if (!document.getElementById('avatarShopModal')) {
+    var s = document.createElement('div');
+    s.id = 'avatarShopModal'; s.className = 'modal'; document.body.appendChild(s);
+  }
+  if (!document.getElementById('profileModal')) {
+    var p = document.createElement('div');
+    p.id = 'profileModal'; p.className = 'modal'; document.body.appendChild(p);
+  }
+}
+
+function openCoinGemShop() {
+  ensureProfileModals();
+  if (!document.getElementById('coinGemShopModal')) {
+    var m = document.createElement('div');
+    m.id = 'coinGemShopModal'; m.className = 'modal'; document.body.appendChild(m);
+  }
+  var coinPackages = [
+    [500,15000],[1000,25000],[2000,40000],[2500,55000],[3000,60000],[5000,75000]
+  ];
+  var gemPackages = [
+    [500,15000],[1000,25000],[2000,40000],[2500,55000],[3000,60000],[5000,75000]
+  ];
+  var h = '<div class="modal-content" style="max-width:760px;max-height:90vh;overflow-y:auto;">';
+  h += '<h2 style="text-align:center;">🛍️ فروشگاه سکه و جم</h2>';
+  h += '<p style="text-align:center;color:#666;">بسته موردنظر خود را انتخاب کنید.</p>';
+  h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">';
+  h += '<div style="border:2px solid #f39c12;border-radius:14px;padding:12px;background:#fffaf2;">';
+  h += '<h3 style="text-align:center;color:#d68910;">🪙 خرید سکه</h3>';
+  h += '<div style="display:grid;gap:8px;">';
+  coinPackages.forEach(function(x){ h += '<div style="border:1px solid #f0c36d;border-radius:10px;padding:10px;display:flex;justify-content:space-between;align-items:center;gap:8px;background:white;"><strong>🪙 '+x[0].toLocaleString('fa-IR')+' سکه</strong><span>'+x[1].toLocaleString('fa-IR')+' تومان</span><button class="btn btn-yellow" style="font-size:11px;padding:6px 9px;" onclick="requestCurrencyPurchase(\'coin\','+x[0]+','+x[1]+')">خرید</button></div>'; });
+  h += '</div></div>';
+  h += '<div style="border:2px solid #9b59b6;border-radius:14px;padding:12px;background:#fbf7ff;">';
+  h += '<h3 style="text-align:center;color:#8e44ad;">💎 خرید جم</h3>';
+  h += '<div style="display:grid;gap:8px;">';
+  gemPackages.forEach(function(x){ h += '<div style="border:1px solid #c9a9e8;border-radius:10px;padding:10px;display:flex;justify-content:space-between;align-items:center;gap:8px;background:white;"><strong>💎 '+x[0].toLocaleString('fa-IR')+' جم</strong><span>'+x[1].toLocaleString('fa-IR')+' تومان</span><button class="btn btn-purple" style="font-size:11px;padding:6px 9px;" onclick="requestCurrencyPurchase(\'gem\','+x[0]+','+x[1]+')">خرید</button></div>'; });
+  h += '</div></div></div>';
+  h += '<div style="margin-top:15px;padding:10px;border-radius:10px;background:#f3f3f3;text-align:center;font-size:12px;">💳 پرداخت واقعی هنوز به درگاه بانکی متصل نیست؛ با زدن «خرید» فقط درخواست خرید ثبت می‌شود.</div>';
+  h += '<button class="btn btn-red" style="width:100%;margin-top:15px;" onclick="closeCoinGemShop()">بستن</button></div>';
+  document.getElementById('coinGemShopModal').innerHTML = h;
+  document.getElementById('coinGemShopModal').classList.add('active');
+}
+
+function requestCurrencyPurchase(type, amount, price) {
+  var label = type === 'coin' ? '🪙 سکه' : '💎 جم';
+  notify('🛒 درخواست خرید '+amount.toLocaleString('fa-IR')+' '+label+' به مبلغ '+price.toLocaleString('fa-IR')+' تومان انتخاب شد. اتصال درگاه در مرحله بعد انجام می‌شود.', 'success');
+}
+
+function closeCoinGemShop() {
+  var m = document.getElementById('coinGemShopModal');
+  if (m) m.classList.remove('active');
+}
+
+function openAvatarShop() {
+  ensureProfileModals();
+  var gems = isOwner ? ownerGems : isModerator ? moderatorGems : myGems;
+  var h = '<div class="modal-content" style="max-width:700px;">';
+  h += '<h2>🛍️ فروشگاه آواتار</h2>';
+  h += '<p style="text-align:center;">💎 الماس شما: <strong>' + gems + '</strong></p>';
+  h += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;max-height:420px;overflow-y:auto;padding:10px;">';
+  for (var i = 0; i < allAvatars.length; i++) {
+    var a = allAvatars[i];
+    var owned = ownedAvatars.indexOf(a.id) > -1;
+    var price = getAvatarPrice(a);
+    var bc = owned ? '#27ae60' : (a.type === 'creator' ? '#f39c12' : a.type === 'moderator' ? '#9b59b6' : a.type === 'joker' ? '#e74c3c' : '#ddd');
+    h += '<div style="border:3px solid ' + bc + ';border-radius:12px;padding:8px;text-align:center;background:white;">';
+    h += '<img src="avatars/' + a.file + '" style="width:70px;height:70px;border-radius:50%;object-fit:cover;" onerror="this.src=\'avatars/avatar1.png\'">';
+    h += '<div style="font-size:11px;font-weight:bold;margin-top:5px;">' + a.name + '</div>';
+    if (owned) {
+      h += '<div style="font-size:11px;color:#27ae60;">✅ خریداری شده</div>';
+      h += '<button class="btn btn-blue" style="font-size:10px;margin-top:3px;" onclick="selectAvatar(' + a.id + ')">انتخاب</button>';
+    } else {
+      h += '<div style="font-size:11px;">💎 ' + price + '</div>';
+      h += '<button class="btn btn-green" style="font-size:10px;margin-top:3px;" onclick="buyAvatar(' + a.id + ')">خرید</button>';
+    }
+    h += '</div>';
+  }
+  h += '</div>';
+  h += '<button class="btn btn-red" style="width:100%;margin-top:15px;" onclick="closeAvatarShop()">بستن</button>';
+  h += '</div>';
+  document.getElementById('avatarShopModal').innerHTML = h;
+  document.getElementById('avatarShopModal').classList.add('active');
+}
+
+function buyAvatar(id) {
+  var a = getAvatarById(id);
+  if (!a) { notify('❌ آواتار پیدا نشد', 'error'); return; }
+  var price = getAvatarPrice(a);
+  if (ownedAvatars.indexOf(id) > -1) { notify('❌ قبلاً خریدی', 'error'); return; }
+  if (!canBuyAvatar(a)) { notify('❌ الماس کافی نیست!', 'error'); return; }
+  if (isOwner) { notify('✅ ' + a.name + ' (ویژه سازنده) خریداری شد!', 'success'); }
+  else if (isModerator && a.type === 'moderator') { notify('✅ ' + a.name + ' (ویژه ناظران) خریداری شد!', 'success'); }
+  else if (isModerator) { moderatorGems -= price; notify('✅ ' + a.name + ' خریداری شد! (' + price + ' الماس کسر شد)', 'success'); }
+  else { myGems -= price; notify('✅ ' + a.name + ' خریداری شد! (' + price + ' الماس کسر شد)', 'success'); }
+  ownedAvatars.push(id);
+  updateCoinDisplay();
+  openAvatarShop();
+}
+
+function closeAvatarShop() {
+  ensureProfileModals();
+  document.getElementById('avatarShopModal').classList.remove('active');
+}
+
+function selectAvatar(id) {
+  if (ownedAvatars.indexOf(id) === -1) { notify('❌ اول باید بخری', 'error'); return; }
+  myAvatar = 'avatars/' + getAvatarById(id).file;
+  notify('✅ آواتار انتخاب شد', 'success');
+  closeAvatarShop();
+  if (typeof renderGameSeats === 'function') renderGameSeats();
+}
+
+function openProfile() {
+  ensureProfileModals();
+  var gems = isOwner ? ownerGems : isModerator ? moderatorGems : myGems;
+  var cns = isOwner ? ownerCoins : isModerator ? moderatorCoins : coins;
+  var privateMe = getPrivateProfileInfo();
+  var userId = isOwner ? '1' : privateMe.code;
+  var h = '<div class="modal-content">';
+  h += '<h2>👤 پروفایل من</h2>';
+  h += '<div style="text-align:center;margin:15px 0;"><img src="' + myAvatar + '" style="width:120px;height:120px;border-radius:50%;object-fit:cover;border:4px solid #3498db;" onerror="this.style.display=\'none\'"></div>';
+  h += '<div class="role-desc">';
+  h += '<p><strong>نام:</strong> ' + privateMe.name + '</p>';
+  var myCodeRole = isOwner ? 'سازنده سایت' : (getUserCodeRole(userRanks[currentUserName] || (isModerator ? 'moderator' : 'user')) === 'special_moderator' ? 'ناظر خاص' : getUserCodeRole(userRanks[currentUserName] || (isModerator ? 'moderator' : 'user')) === 'moderator' ? 'ناظر' : 'کاربر عادی');
+  h += '<p><strong>کد کاربری:</strong> ' + userId + '</p>';
+  h += '<p><strong>⭐ سطح:</strong> ' + getUserLevel(currentUserName) + '</p>';
+  h += '<p><strong>🏷️ نوع کد:</strong> ' + myCodeRole + '</p>';
+  h += '<button class="btn btn-blue" style="width:100%;margin-bottom:8px;" onclick="copyMyUserCode()">📋 کپی کد کاربری</button>';
+  h += '<p><strong>📧 ایمیل:</strong> ' + privateMe.email + '</p>';
+  h += '<p><strong>🎂 سن:</strong> ' + privateMe.age + '</p>';
+  h += '<p><strong>📅 تاریخ تولد:</strong> ' + privateMe.birth + '</p>';
+  h += '<p><strong>🪙 سکه:</strong> ' + cns + '</p>';
+  h += '<p><strong>💎 الماس:</strong> ' + gems + '</p>';
+  h += '<p><strong>🎭 نقش:</strong> ' + (myRole || 'هنوز شروع نشده') + '</p>';
+  h += '</div>';
+  if (isCurrentSiteAdmin()) h += '<button class="btn btn-blue" style="width:100%;margin-bottom:8px;" onclick="closeProfile();openSiteAdminPanel();">👑 اطلاعات ثبت‌نام کاربران</button>';
+  h += '<button class="btn btn-purple" style="width:100%;margin-bottom:8px;" onclick="closeProfile();openAvatarShop();">🛍️ فروشگاه آواتار</button>';
+  h += '<button class="btn btn-red" style="width:100%;" onclick="closeProfile()">بستن</button>';
+  h += '</div>';
+  document.getElementById('profileModal').innerHTML = h;
+  document.getElementById('profileModal').classList.add('active');
+}
+
+function closeProfile() {
+  ensureProfileModals();
+  document.getElementById('profileModal').classList.remove('active');
+}
+
+function giveChallenge() {
+  if (dayChallengeDone) { notify('❌ امروز چالش دادی', 'error'); return; }
+  var targets = alivePlayers.filter(function(p) { return p !== 'شما'; });
+  var h = '<div class="ability-box"><h4>⚔️ چالش - یکی رو انتخاب کن</h4>';
+  targets.forEach(function(t) { h += '<button class="ability-btn" onclick="sendChallenge(\'' + t + '\')">' + t + '</button>'; });
+  h += '<button class="ability-btn" onclick="cancelChallenge()" style="background:#95a5a6;color:white;">❌ لغو</button></div>';
+  var g = document.getElementById('gameRoom').classList.contains('active');
+  var area = g ? document.getElementById('abilityArea') : document.getElementById('rankedAbilityArea');
+  area.innerHTML = h;
+}
+
+function sendChallenge(target) {
+  dayChallengeDone = true;
+  notify('⚔️ به ' + target + ' چالش دادی!', 'success');
+  var g = document.getElementById('gameRoom').classList.contains('active');
+  var t = g ? 'gamePhaseTitle' : 'rankedGamePhaseTitle';
+  var i = g ? 'gamePhaseInfo' : 'rankedGamePhaseInfo';
+  var te = g ? 'gameTimerDisplay' : 'rankedGameTimerDisplay';
+  document.getElementById(t).textContent = '⚔️ چالش: ' + target;
+  document.getElementById(i).textContent = target + ' باید ' + timeChallenge + ' ثانیه صحبت کنه';
+  var timer = timeChallenge;
+  document.getElementById(te).textContent = timer;
+  clearInterval(phaseTimerInterval);
+  phaseTimerInterval = setInterval(function() {
+    if (!gamePaused) {
+      timer--;
+      document.getElementById(te).textContent = timer;
+      if (timer <= 0) { clearInterval(phaseTimerInterval); notify('✅ چالش تموم شد', 'success'); startDayPhase(); }
+    }
+  }, 1000);
+}
+
+function cancelChallenge() {
+  var g = document.getElementById('gameRoom').classList.contains('active');
+  var area = g ? document.getElementById('abilityArea') : document.getElementById('rankedAbilityArea');
+  area.innerHTML = '';
+}
+
+function checkKS() {
+  if (alivePlayers.length === 3 && !ksActive) {
+    ksActive = true;
+    var g = document.getElementById('gameRoom').classList.contains('active');
+    var t = g ? 'gamePhaseTitle' : 'rankedGamePhaseTitle';
+    var i = g ? 'gamePhaseInfo' : 'rankedGamePhaseInfo';
+    var te = g ? 'gameTimerDisplay' : 'rankedGameTimerDisplay';
+    var sp = g ? 'speakingIndicator' : 'rankedSpeakingIndicator';
+    document.getElementById(t).textContent = '🔥 کی‌اس (KS) - ۳ نفره';
+    document.getElementById(i).textContent = timeKS + ' ثانیه صحبت آزاد';
+    document.getElementById(sp).textContent = '🔥 همه آزاد صحبت کنید';
+    var timer = timeKS;
+    document.getElementById(te).textContent = timer;
+    clearInterval(phaseTimerInterval);
+    phaseTimerInterval = setInterval(function() {
+      if (!gamePaused) {
+        timer--;
+        document.getElementById(te).textContent = timer;
+        if (timer <= 0) { clearInterval(phaseTimerInterval); ksActive = false; startVotePhase(); }
+      }
+    }, 1000);
+    return true;
+  }
+  return false;
+}
+
+function checkDetectiveReturn() {
+  if (myRole === 'بازپرس' && defendingPlayers.length === 2) {
+    var stillAlive = defendingPlayers.filter(function(p) { return alivePlayers.indexOf(p) > -1; });
+    if (stillAlive.length < 2) {
+      myAbilityUsedThisNight = false;
+      notify('🔍 قابلیت بازپرس برگشت!', 'success');
+    }
+  }
+}
+
+function likeMessage(msgId) { notify('👍 لایک شد', 'success'); }
+function dislikeMessage(msgId) { notify('👎 دیس‌لایک شد', 'error'); }
+
+function cancelRankedSearch() {
+  clearInterval(searchInterval);
+  document.getElementById('rankedSearchBox').style.display = 'none';
+  document.getElementById('rankedSearchBox').innerHTML = '';
+  foundPlayers = 0;
+  notify('❌ جستجو لغو شد', 'warning');
+}
+
+function yakuzai() {
+  if (myRole !== 'رئیس مافیا') return;
+  var mafiaCount = 0, mafiaList = [];
+  for (var i = 0; i < alivePlayers.length; i++) {
+    var r = playerRoles[alivePlayers[i]] || '';
+    if (r.indexOf('مافیا') > -1) { mafiaCount++; mafiaList.push(alivePlayers[i]); }
+  }
+  var h = '<div class="ability-box"><h4>🤝 یاکوزایی</h4>';
+  if (mafiaCount > 1) {
+    h += '<p style="font-size:12px;">یه مافیا رو فدا کن</p>';
+    mafiaList.forEach(function(m) { if (m !== 'شما') h += '<button class="ability-btn" onclick="yakuFada(\'' + m + '\')">' + m + '</button>'; });
+  } else {
+    h += '<p style="font-size:12px;">خودت رو فدا کن</p>';
+    h += '<button class="ability-btn" onclick="yakuFada(\'شما\')">خودم</button>';
+  }
+  h += '<button class="ability-btn" onclick="showMyAbility()" style="background:#95a5a6;color:white;">❌ لغو</button></div>';
+  var area = document.getElementById('gameRoom').classList.contains('active') ? document.getElementById('abilityArea') : document.getElementById('rankedAbilityArea');
+  area.innerHTML = h;
+}
+
+function yakuFada(fada) {
+  notify('🤝 ' + fada + ' فدا شد', 'warning');
+  var targets = alivePlayers.filter(function(p) { return p !== 'شما' && p !== fada && playerRoles[p] === 'شهروند'; });
+  var h = '<div class="ability-box"><h4>🤝 کی رو مذاکره کنم؟</h4>';
+  if (targets.length === 0) h += '<p>هیچ شهروند ساده‌ای نیست</p>';
+  else targets.forEach(function(t) { h += '<button class="ability-btn" onclick="yakuMozakere(\'' + fada + '\',\'' + t + '\')">' + t + '</button>'; });
+  h += '<button class="ability-btn" onclick="showMyAbility()" style="background:#95a5a6;color:white;">❌ لغو</button></div>';
+  var area = document.getElementById('gameRoom').classList.contains('active') ? document.getElementById('abilityArea') : document.getElementById('rankedAbilityArea');
+  area.innerHTML = h;
+}
+
+function yakuMozakere(fada, target) {
+  playerRoles[target] = 'مافیا';
+  yakuActive = true; yakuUsedOnce = true;
+  notify('🎉 ' + target + ' به مافیا پیوست!', 'success');
+  myAbilityUsedThisNight = true;
+  showMyAbility();
+}
+
+function selectDefender(t) {
+  if (detectivePicks.indexOf(t) > -1) return;
+  detectivePicks.push(t);
+  notify('🔍 ' + t + ' انتخاب شد (' + detectivePicks.length + '/2)', 'success');
+  if (detectivePicks.length === 2) {
+    myAbilityUsedThisNight = true;
+    defendingPlayers = detectivePicks.slice();
+    detectivePicks = [];
+    setTimeout(function() { startDefensePhase(); }, 1500);
+  }
+}
+
+function setAccuser(p) { accuserSet = p; notify('⚖️ ' + p + ' اتهام‌زننده شد', 'success'); showNextDefender(); }
+function setDefender(p) { defenderSet = p; notify('⚖️ ' + p + ' دفاع‌کننده شد', 'success'); showNextDefender(); }
+
+function showMyAbility() {
+  var g = document.getElementById('gameRoom').classList.contains('active');
+  var area = g ? document.getElementById('abilityArea') : document.getElementById('rankedAbilityArea');
+  if (!area) return;
+  if (nightAbilityLocked) { area.innerHTML = '<div class="ability-box"><p>🌙 شب معارفه - ابلیتی قفل است</p></div>'; return; }
+  if (hostageGrabbedPlayers.indexOf('شما') > -1) { area.innerHTML = '<div class="ability-box"><p>🎭 گروگان گرفته شدی</p></div>'; return; }
+  if (myAbilityUsedThisNight) { area.innerHTML = '<div class="ability-box"><p>✅ ابلیت این شب استفاده شد</p></div>'; return; }
+  var targets = alivePlayers.filter(function(p) { return p !== 'شما'; });
+  var h = '<div class="ability-box"><h4>⚡ ابلیت: ' + myRole + '</h4>';
+  if (myRole === 'کارآگاه') targets.forEach(function(t) { h += '<button class="ability-btn" onclick="detectiveInquiry(\'' + t + '\')">' + t + '</button>'; });
+  else if (myRole === 'پزشک') alivePlayers.forEach(function(t) { h += '<button class="ability-btn" onclick="doctorSave(\'' + t + '\')">' + t + '</button>'; });
+  else if (myRole === 'رئیس مافیا') {
+    if (yakuActive) h += '<p style="font-size:12px;">🌙 شب یاکوزایی</p>';
+    else targets.forEach(function(t) { var r = playerRoles[t] || ''; if (r.indexOf('مافیا') === -1 && r !== 'ناتو' && r !== 'شیاد' && r !== 'گروگان‌گیر') h += '<button class="ability-btn" onclick="mafiaShoot(\'' + t + '\')">' + t + '</button>'; });
+    h += '<button class="ability-btn" onclick="yakuzai()" style="background:#9b59b6;color:white;">🤝 یاکوزایی</button>';
+  }
+  else if (myRole === 'بازپرس') targets.forEach(function(t) { h += '<button class="ability-btn" onclick="selectDefender(\'' + t + '\')">' + t + '</button>'; });
+  else if (myRole === 'محقق') targets.forEach(function(t) { h += '<button class="ability-btn" onclick="investigatorLink(\'' + t + '\')">' + t + '</button>'; });
+  else if (myRole === 'نگهبان') targets.forEach(function(t) { h += '<button class="ability-btn" onclick="guardSave(\'' + t + '\')">' + t + '</button>'; });
+  else if (myRole === 'گروگان‌گیر') targets.forEach(function(t) { h += '<button class="ability-btn" onclick="hostageTake(\'' + t + '\')">' + t + '</button>'; });
+  else if (myRole === 'شیاد') targets.forEach(function(t) { h += '<button class="ability-btn" onclick="tricksterHit(\'' + t + '\')">' + t + '</button>'; });
+  else if (myRole === 'ناتو') { if (natoUsed) h += '<p>قبلاً استفاده شده</p>'; else targets.forEach(function(t) { h += '<button class="ability-btn" onclick="natoGuess(\'' + t + '\')">' + t + '</button>'; }); }
+  else if (myRole === 'تفنگدار') { if (gunnerUsed) h += '<p>قبلاً استفاده شده</p>'; else { targets.forEach(function(t) { h += '<button class="ability-btn" onclick="gunnerGive(\'' + t + '\')">' + t + '</button>'; }); h += '<button class="ability-btn" onclick="gunnerGiveSelf()" style="background:#e74c3c;color:white;">🎯 فشنگ جنگی به خودم</button>'; } }
+  else if (myRole === 'تکاور') { if (tankUsed) h += '<p>قبلاً استفاده شده</p>'; else if (!tankCanShoot) h += '<p style="font-size:12px;">فقط وقتی مافیا تو رو کشته باشه</p>'; else targets.forEach(function(t) { h += '<button class="ability-btn" onclick="commandoShoot(\'' + t + '\')">' + t + '</button>'; }); }
+  else if (myRole === 'تک تیرانداز') { if (sniperUsed) h += '<p>قبلاً استفاده شده</p>'; else targets.forEach(function(t) { h += '<button class="ability-btn" onclick="sniperShoot(\'' + t + '\')">' + t + '</button>'; }); }
+  else if (myRole === 'مذاکره‌کننده') { if (negotiatorUsed) h += '<p>قبلاً استفاده شده</p>'; else targets.forEach(function(t) { h += '<button class="ability-btn" onclick="negotiatorOffer(\'' + t + '\')">' + t + '</button>'; }); }
+  else if (myRole === 'خبرنگار') { if (!yakuUsedOnce) h += '<p style="font-size:12px;">استعلام فقط بعد از یاکوزایی فعال میشه</p>'; else targets.forEach(function(t) { h += '<button class="ability-btn" onclick="reporterInquiry(\'' + t + '\')">' + t + '</button>'; }); }
+  else h += '<p>نقش شما ابلیت شبانه ندارد</p>';
+  h += '</div>';
+  area.innerHTML = h;
+}
+
+function detectiveInquiry(t) {
+  var r = playerRoles[t] || '';
+  var res = (r.indexOf('مافیا') > -1 || r === 'شیاد' || r === 'ناتو' || r === 'گروگان‌گیر') ? '👍 مافیا' : '👎 شهروند';
+  if (r === 'رئیس مافیا') res = '👎 شهروند (منفی)';
+  if (tricksterTarget === t) res = '👎 شهروند (شیاد زده)';
+  playerPoints['شما'] = (playerPoints['شما'] || 0) + 20;
+  notify('🕵🏻 ' + t + ': ' + res, 'success');
+  myAbilityUsedThisNight = true;
+  showMyAbility();
+}
+
+function doctorSave(t) {
+  if (savedPlayersThisNight.indexOf(t) === -1) savedPlayersThisNight.push(t);
+  playerPoints['شما'] = (playerPoints['شما'] || 0) + 20;
+  notify('🧑🏻‍⚕️ ' + t + ' سیو شد', 'success');
+  myAbilityUsedThisNight = true;
+  showMyAbility();
+}
+
+function mafiaShoot(t) {
+  if (playerRoles[t] === 'رویین تن') notify('🛡️ رویین تن نامیراست - زنده موند!', 'warning');
+  else if (playerRoles[t] === 'زره پوش') notify('🛡️ زره پوش مقاوم است - زنده موند!', 'warning');
+  else if (savedPlayersThisNight.indexOf(t) > -1) notify('🛡️ ' + t + ' سیو شده بود', 'warning');
+  else { deadPlayersThisNight.push(t); notify('🔫 ' + t + ' هدف شلیک قرار گرفت', 'error'); if (t === 'شما' && myRole === 'تکاور') { tankCanShoot = true; notify('⚔️ تکاور می‌تونه شلیک کنه!', 'warning'); } }
+  playerPoints['شما'] = (playerPoints['شما'] || 0) + 30;
+  myAbilityUsedThisNight = true;
+  showMyAbility();
+}
+
+function investigatorLink(t) { investigatorLinkedTo = t; notify('🕵🏻 به ' + t + ' گره خوردی', 'success'); myAbilityUsedThisNight = true; showMyAbility(); }
+function guardSave(t) { if (guardSavedPlayers.indexOf(t) === -1) guardSavedPlayers.push(t); if (guardProtectedPlayers.indexOf(t) === -1) guardProtectedPlayers.push(t); notify('🛡️ ' + t + ' محافظت شد', 'success'); myAbilityUsedThisNight = true; showMyAbility(); }
+function hostageTake(t) { if (guardProtectedPlayers.indexOf(t) > -1) notify('🛡️ ' + t + ' محافظت شده', 'warning'); else { hostageGrabbedPlayers.push(t); notify('🎭 ' + t + ' گروگان گرفته شد', 'warning'); } myAbilityUsedThisNight = true; showMyAbility(); }
+function tricksterHit(t) { tricksterTarget = t; notify('🎭 به ' + t + ' زدی', 'success'); myAbilityUsedThisNight = true; showMyAbility(); }
+
+function natoGuess(t) {
+  if (natoUsed) { notify('❌ قبلاً استفاده شده', 'error'); return; }
+  natoUsed = true;
+  var r = playerRoles[t] || '';
+  if (r !== 'شهروند' && r !== 'رئیس مافیا') { alivePlayers = alivePlayers.filter(function(p) { return p !== t; }); deadPlayers.push(t); notify('💣 ناتو موفق!', 'success'); }
+  else notify('💣 ناتو اشتباه!', 'error');
+  playerPoints['شما'] = (playerPoints['شما'] || 0) + 40;
+  myAbilityUsedThisNight = true;
+  showMyAbility();
+  renderGameSeats();
+}
+
+function gunnerGive(t) { if (gunnerUsed) { notify('❌ قبلاً استفاده شده', 'error'); return; } gunnerUsed = true; gunnerTarget = t; gunnerShootActive = true; gunnerShootTarget = t; notify('🔫 تفنگ به ' + t + ' داده شد', 'success'); myAbilityUsedThisNight = true; showMyAbility(); }
+function gunnerGiveSelf() { if (gunnerUsed) { notify('❌ قبلاً استفاده شده', 'error'); return; } gunnerUsed = true; gunnerTarget = 'شما'; gunnerShootActive = true; gunnerShootTarget = 'شما'; notify('🎯 فشنگ جنگی به خودت دادی!', 'success'); myAbilityUsedThisNight = true; showMyAbility(); }
+
+function gunnerShoot(t) {
+  var r = playerRoles[t] || '';
+  if (r === 'رئیس مافیا') notify('🔫 رئیس مافیا رو زدی - زنده موند', 'warning');
+  else if (r.indexOf('مافیا') > -1 || r === 'گروگان‌گیر' || r === 'ناتو' || r === 'شیاد') { alivePlayers = alivePlayers.filter(function(p) { return p !== t; }); deadPlayers.push(t); notify('💀 ' + t + ' با تفنگ خارج شد!', 'success'); }
+  else notify('❌ اشتباه - ' + t + ' شهروند بود', 'error');
+  gunnerShootActive = false; gunnerShootTarget = null;
+  renderGameSeats();
+}
+
+function commandoShoot(t) {
+  if (tankUsed) { notify('❌ قبلاً استفاده شده', 'error'); return; }
+  if (!tankCanShoot) { notify('❌ فقط وقتی مافیا تو رو کشته باشه', 'error'); return; }
+  tankUsed = true; tankCanShoot = false;
+  var r = playerRoles[t] || '';
+  if (r === 'رئیس مافیا') notify('⚔️ رئیس مافیا رو زدی - هیچ‌کس خارج نشد', 'warning');
+  else if (r.indexOf('مافیا') > -1 || r === 'گروگان‌گیر' || r === 'ناتو' || r === 'شیاد') { alivePlayers = alivePlayers.filter(function(p) { return p !== t; }); deadPlayers.push(t); notify('💀 ' + t + ' خارج شد', 'success'); }
+  else { notify('❌ اشتباه! خودت خارج می‌شوی', 'error'); alivePlayers = alivePlayers.filter(function(p) { return p !== 'شما'; }); deadPlayers.push('شما'); }
+  playerPoints['شما'] = (playerPoints['شما'] || 0) + 30;
+  myAbilityUsedThisNight = true;
+  showMyAbility();
+  renderGameSeats();
+}
+
+function sniperShoot(t) {
+  if (sniperUsed) { notify('❌ قبلاً استفاده شده', 'error'); return; }
+  sniperUsed = true;
+  var r = playerRoles[t] || '';
+  if (r === 'رئیس مافیا') notify('🎯 رئیس مافیا رو زدی', 'warning');
+  else if (r.indexOf('مافیا') > -1 || r === 'گروگان‌گیر' || r === 'ناتو' || r === 'شیاد') { alivePlayers = alivePlayers.filter(function(p) { return p !== t; }); deadPlayers.push(t); notify('💀 ' + t + ' خارج شد', 'success'); }
+  else { notify('❌ اشتباه! خودت خارج می‌شوی', 'error'); alivePlayers = alivePlayers.filter(function(p) { return p !== 'شما'; }); deadPlayers.push('شما'); }
+  playerPoints['شما'] = (playerPoints['شما'] || 0) + 30;
+  myAbilityUsedThisNight = true;
+  showMyAbility();
+  renderGameSeats();
+}
+
+function negotiatorOffer(t) { if (negotiatorUsed) { notify('❌ قبلاً استفاده شده', 'error'); return; } negotiatorUsed = true; notify('🤝 به ' + t + ' پیشنهاد پیوستن داده شد', 'success'); myAbilityUsedThisNight = true; showMyAbility(); }
+function reporterInquiry(t) { notify('📰 استعلام ' + t + ': ' + (playerRoles[t] || '?'), 'success'); myAbilityUsedThisNight = true; showMyAbility(); }
+
+function showCreateForm() { document.getElementById('createForm').classList.add('active'); document.getElementById('lobbyListBox').style.display = 'none'; }
+function showLobbyList() { document.getElementById('createForm').classList.remove('active'); document.getElementById('lobbyListBox').style.display = 'block'; renderLobbyList(); }
+
+function renderLobbyList() {
+  var box = document.getElementById('lobbyListBox');
+  if (lobbies.length === 0) { box.innerHTML = '<p style="text-align:center;">هیچ لابی نیست</p>'; return; }
+  box.innerHTML = '';
+  for (var i = 0; i < lobbies.length; i++) {
+    (function(idx) {
+      var l = lobbies[idx];
+      var d = document.createElement('div');
+      d.className = 'lobby-card';
+      if (l.ownerLeft) d.className += ' owner-left';
+      d.innerHTML = '<div><strong>'+l.name+'</strong><br><small>'+l.players.length+'/'+l.max+' | '+l.owner+'</small></div>';
+      var btn = document.createElement('button');
+      btn.textContent = 'پیوستن';
+      btn.className = 'btn btn-blue';
+      btn.onclick = function() { joinLobby(idx); };
+      d.appendChild(btn);
+      box.appendChild(d);
+    })(i);
+  }
+}
+
+function createLobby() {
+  var name = document.getElementById('lobbyName').value.trim();
+  if (!name) { alert('نام را وارد کنید'); return; }
+  selectedLocation = document.getElementById('lobbyLocation').value; seatLayout = 'classic'; blacklistedPlayers = []; lockedMicPlayers = []; chatLocked = false; emojiLocked = false; globalMicLock = false;
+  var pass = document.getElementById('lobbyPass').value.trim();
+  myLobby = { name: name, max: 10, players: samplePlayers.slice(), seats: [], owner: 'شما', started: false, hasPass: pass ? true : false, pass: pass || null, locked: false, location: selectedLocation, ownerLeft: false, moderators: [] };
+  for (var i = 0; i < 10; i++) { if (i === 0) myLobby.seats.push('شما'); else myLobby.seats.push(samplePlayers[i]); }
+  mySeatIndex = 0; isOwner = true; isModerator = true; userRanks['شما'] = 'senior_team_admin'; entryPaid = false;
+  lobbies.push(myLobby);
+  document.getElementById('createForm').classList.remove('active');
+  document.getElementById('lobbyRoom').classList.add('active');
+  document.getElementById('ownerPanel').classList.add('active');
+  renderRoom();
+  notify('✅ لابی ساخته شد!', 'success');
+}
+
+function getUserCodeByName(name) {
+  if (name === currentUserName || name === 'شما') return currentUserCode || '---';
+  var users = [];
+  try { users = JSON.parse(localStorage.getItem('msh_users') || '[]'); } catch (e) {}
+  for (var i = 0; i < users.length; i++) if (users[i] && users[i].name === name) return users[i].code || '---';
+  var idx = samplePlayers.indexOf(name);
+  return idx >= 0 ? String(100001 + idx) : '---';
+}
+
+function renderClanBadges(){
+  var ids=['clanLobbyBadge','clanGameBadge','clanRankedBadge'];
+  var visible=!!siteClan;
+  ids.forEach(function(id){
+    var el=document.getElementById(id);
+    if(!el)return;
+    el.style.display=visible?'block':'none';
+    el.textContent=visible ? clanBadgeHtml() : '';
+    if(visible) el.title=(siteClan.name||'کلن')+' | سطح '+(siteClan.level||1);
+  });
+}
+
+function renderRoom() {
+  if (!myLobby) return;
+  var locationNames = {default:'🏠 پیش‌فرض', city:'🏙️ شهر', castle:'🏰 قلعه', ship:'🚢 کشتی', forest:'🌲 جنگل', beach:'🏖️ ساحل', desert:'🏜️ کویر', space:'🚀 فضا', village:'🏡 روستا', prison:'⛓️ زندان', island:'🏝️ جزیره'};
+  document.getElementById('roomName').textContent = 'لابی: ' + myLobby.name;
+  document.getElementById('roomInfo').textContent = selectedScenario + ' | ' + (locationNames[selectedLocation] || '') + ' | ۱۰ نفر | مالک: ' + myLobby.owner;
+  document.getElementById('passInfo').textContent = myLobby.hasPass && isOwner ? '🔒 رمز: ' + myLobby.pass : '';
+  var box = document.getElementById('seatsBox');
+  box.innerHTML = '';
+  for (var i = 0; i < myLobby.seats.length; i++) {
+    (function(idx) {
+      var s = document.createElement('div');
+      s.className = 'seat occupied';
+      if (idx === mySeatIndex) s.classList.add('selected');
+      var pn = myLobby.seats[idx] || 'خالی';
+      var publicCode = getUserCodeByName(pn);
+      s.innerHTML = '<div class="avatar">👤</div><div class="name">'+pn+'</div><div style="font-size:10px;opacity:.85;">⭐ سطح: '+getUserLevel(pn)+' | 🔑 کد: '+publicCode+'</div>';
+      box.appendChild(s);
+    })(i);
+  }
+  var sel = document.getElementById('playerSelect');
+  sel.innerHTML = '<option value="">انتخاب بازیکن...</option>';
+  for (var j = 0; j < myLobby.seats.length; j++) {
+    if (myLobby.seats[j] && myLobby.seats[j] !== 'خالی') {
+      var mark = blacklistedPlayers.indexOf(myLobby.seats[j]) !== -1 ? ' ⛔' : (lockedMicPlayers.indexOf(myLobby.seats[j]) !== -1 ? ' 🔇' : '');
+      sel.innerHTML += '<option value="'+j+'">'+myLobby.seats[j]+mark+'</option>';
+    }
+  }
+  applySeatLayout();
+  var cs = document.getElementById('ownerLocationSelect');
+  if (cs) cs.value = selectedLocation;
+  var cb = document.getElementById('chatLockStatus');
+  if (cb) cb.style.display = chatLocked ? 'block' : 'none';
+  renderClanBadges();
+}
+
+function joinLobby(idx) {
+  var l = lobbies[idx];
+  myLobby = l; mySeatIndex = 0; isOwner = (l.owner === 'شما'); isModerator = isOwner; if (isOwner) userRanks['شما'] = 'senior_team_admin'; entryPaid = false;
+  document.getElementById('lobbyListBox').style.display = 'none';
+  document.getElementById('lobbyRoom').classList.add('active');
+  if (isOwner) document.getElementById('ownerPanel').classList.add('active');
+  else document.getElementById('ownerPanel').classList.remove('active');
+  renderRoom();
+  notify('✅ پیوستی', 'success');
+}
+
+function addEmoji(e) {
+  if (emojiLocked) { notify('🔒 ایموجی توسط سازنده بسته شده است', 'warning'); return; }
+  var i = document.getElementById('chatInput');
+  if (i) i.value += e;
+}
+
+function sendChat() {
+  if (chatLocked) { notify('🔒 پیام‌رسانی توسط سازنده بسته شده است', 'warning'); return; }
+  var i = document.getElementById('chatInput');
+  var b = document.getElementById('chatBox');
+  if (!i || !b) return;
+  var m = i.value.trim();
+  if (!m) return;
+  var msgId = 'msg_' + Date.now();
+  var div = document.createElement('div');
+  div.className = 'chat-message';
+  div.innerHTML = '<strong>شما:</strong> ' + m + ' <span class="likes" onclick="likeMessage(\'' + msgId + '\')">👍 0</span> <span class="dislikes" onclick="dislikeMessage(\'' + msgId + '\')">👎 0</span>';
+  b.appendChild(div);
+  b.scrollTop = b.scrollHeight;
+  i.value = '';
+}
+
+function kickPlayer() {
+  var idx = parseInt(document.getElementById('playerSelect').value);
+  if (isNaN(idx) || idx < 0) { alert('انتخاب کن'); return; }
+  myLobby.seats[idx] = 'خالی';
+  renderRoom();
+  notify('🚫 اخراج شد', 'error');
+}
+
+function transferOwner() {
+  var idx = parseInt(document.getElementById('playerSelect').value);
+  if (isNaN(idx) || idx < 0) { alert('انتخاب کن'); return; }
+  myLobby.owner = myLobby.seats[idx];
+  if (myLobby.owner !== 'شما') { isOwner = false; document.getElementById('ownerPanel').classList.remove('active'); }
+  renderRoom();
+  notify('👑 انتقال مدیریت', 'success');
+}
+
+function setModerator() {
+  if (!isOwner) { notify('❌ فقط سازنده می‌تواند ناظر تعیین کند', 'error'); return; }
+
+  var idx = parseInt(document.getElementById('playerSelect').value);
+  if (isNaN(idx) || idx < 0 || !myLobby || !myLobby.seats[idx] || myLobby.seats[idx] === 'خالی') {
+    notify('❌ ابتدا یک بازیکن دیگر را انتخاب کنید', 'error');
+    return;
+  }
+
+  var target = myLobby.seats[idx];
+  if (target === 'شما' || target === myLobby.owner) {
+    // The creator can also carry the moderator role, while keeping full creator access.
+    if (!myLobby.moderators) myLobby.moderators = [];
+    if (myLobby.moderators.indexOf('شما') === -1) {
+      if (myLobby.moderators.length >= 2) {
+        notify('❌ حداکثر ۲ ناظر!', 'error');
+        return;
+      }
+      myLobby.moderators.push('شما');
+    }
+    moderatorCount = myLobby.moderators.length;
+    isModerator = true;
+    userRanks['شما'] = 'senior_team_admin';
+    moderatorState['شما'] = moderatorState['شما'] || {};
+    moderatorState['شما'].isModerator = true;
+    moderatorState['شما'].rank = 'moderator';
+    notify('👑 سازنده با موفقیت ناظر هم شد؛ دسترسی سازنده همچنان کامل است', 'success');
+    renderRoom();
+    return;
+  }
+
+  if (!myLobby.moderators) myLobby.moderators = [];
+  if (myLobby.moderators.indexOf(target) !== -1) {
+    notify('❌ این بازیکن از قبل ناظر است', 'warning');
+    return;
+  }
+  if (myLobby.moderators.length >= 2) {
+    notify('❌ حداکثر ۲ ناظر!', 'error');
+    return;
+  }
+
+  myLobby.moderators.push(target);
+  moderatorCount = myLobby.moderators.length;
+  userRanks[target] = 'moderator';
+  moderatorState[target] = moderatorState[target] || {};
+  moderatorState[target].isModerator = true;
+  moderatorState[target].rank = 'moderator';
+
+  notify('👤 ' + target + ' ناظر شد (' + moderatorCount + '/2)', 'success');
+  renderRoom();
+}
+
+function removeModerator() {
+  if (!isOwner) { notify('❌ فقط سازنده می‌تواند ناظر را حذف کند', 'error'); return; }
+
+  var idx = parseInt(document.getElementById('playerSelect').value);
+  if (isNaN(idx) || idx < 0 || !myLobby || !myLobby.seats[idx]) {
+    notify('❌ ابتدا ناظر را انتخاب کنید', 'error');
+    return;
+  }
+
+  var target = myLobby.seats[idx];
+  if (!myLobby.moderators) myLobby.moderators = [];
+
+  var pos = myLobby.moderators.indexOf(target);
+  if ((target === 'شما' || target === myLobby.owner) && isOwner) {
+    if (pos !== -1) myLobby.moderators.splice(pos, 1);
+    moderatorCount = myLobby.moderators.length;
+    isModerator = true; // creator keeps full access even after removing moderator label
+    userRanks['شما'] = 'senior_team_admin';
+    if (moderatorState['شما']) {
+      moderatorState['شما'].isModerator = false;
+      delete moderatorState['شما'].rank;
+    }
+    notify('ℹ️ مقام ناظر از سازنده برداشته شد؛ دسترسی سازنده کامل باقی ماند', 'warning');
+    renderRoom();
+    return;
+  }
+  if (pos === -1) {
+    notify('❌ این بازیکن ناظر نیست', 'warning');
+    return;
+  }
+
+  myLobby.moderators.splice(pos, 1);
+  moderatorCount = myLobby.moderators.length;
+  userRanks[target] = 'user';
+  if (moderatorState[target]) {
+    moderatorState[target].isModerator = false;
+    delete moderatorState[target].rank;
+  }
+
+  notify('❌ ناظریِ ' + target + ' برداشته شد', 'warning');
+  renderRoom();
+}
+
+function ownerOnlyAction() {
+  if (!isOwner) { notify('❌ فقط سازنده لابی اجازه این کار را دارد', 'error'); return false; }
+  return true;
+}
+
+function getSelectedPlayerName() {
+  var sel = document.getElementById('playerSelect');
+  if (!sel || !myLobby) return '';
+  var idx = parseInt(sel.value);
+  if (isNaN(idx) || idx < 0 || !myLobby.seats[idx] || myLobby.seats[idx] === 'خالی') return '';
+  return myLobby.seats[idx];
+}
+
+function blacklistSelectedPlayer() {
+  if (!ownerOnlyAction()) return;
+  var target = getSelectedPlayerName();
+  if (!target || target === 'شما' || target === myLobby.owner) {
+    notify('❌ یک بازیکن دیگر را انتخاب کنید', 'error'); return;
+  }
+  if (blacklistedPlayers.indexOf(target) === -1) blacklistedPlayers.push(target);
+  notify('⛔ ' + target + ' به لیست سیاه اضافه شد', 'error');
+  renderRoom();
+}
+
+function unblacklistSelectedPlayer() {
+  if (!ownerOnlyAction()) return;
+  var target = getSelectedPlayerName();
+  if (!target) { notify('❌ بازیکن را انتخاب کنید', 'error'); return; }
+  blacklistedPlayers = blacklistedPlayers.filter(function(n) { return n !== target; });
+  notify('✅ ' + target + ' از لیست سیاه برداشته شد', 'success');
+}
+
+function lockSelectedMic() {
+  if (!ownerOnlyAction()) return;
+  globalMicLock = true;
+  notify('🔇 میکروفون همه بازیکنان قفل شد (سازنده و ناظرها مستثنی هستند)', 'warning');
+}
+
+function unlockAllMics() {
+  if (!ownerOnlyAction()) return;
+  globalMicLock = false;
+  notify('🎤 میکروفون همه باز شد', 'success');
+}
+
+function toggleChatLock() {
+  if (!ownerOnlyAction()) return;
+  chatLocked = true;
+  document.getElementById('lobbyRoom').classList.add('chat-locked');
+  document.getElementById('chatLockStatus').style.display = 'block';
+  notify('🔒 پیام‌ها بسته شد', 'warning');
+}
+
+function unlockChat() {
+  if (!ownerOnlyAction()) return;
+  chatLocked = false;
+  document.getElementById('lobbyRoom').classList.remove('chat-locked');
+  document.getElementById('chatLockStatus').style.display = 'none';
+  notify('🔓 پیام‌ها باز شد', 'success');
+}
+
+function toggleEmojiLock() {
+  if (!ownerOnlyAction()) return;
+  emojiLocked = true;
+  document.getElementById('lobbyRoom').classList.add('emoji-locked');
+  notify('🔒 ایموجی‌ها بسته شد', 'warning');
+}
+
+function unlockEmoji() {
+  if (!ownerOnlyAction()) return;
+  emojiLocked = false;
+  document.getElementById('lobbyRoom').classList.remove('emoji-locked');
+  notify('🔓 ایموجی‌ها باز شد', 'success');
+}
+
+function changeGameEnvironment() {
+  if (!ownerOnlyAction()) return;
+  var s = document.getElementById('ownerLocationSelect');
+  if (!s) return;
+  selectedLocation = s.value;
+  var createSel = document.getElementById('lobbyLocation');
+  if (createSel) createSel.value = selectedLocation;
+  renderRoom();
+  notify('🌍 محیط بازی تغییر کرد', 'success');
+}
+
+function changeSeatLayout() {
+  if (!ownerOnlyAction()) return;
+  var s = document.getElementById('seatLayoutSelect');
+  if (!s) return;
+  seatLayout = s.value;
+  applySeatLayout();
+  notify('🪑 چیدمان صندلی تغییر کرد', 'success');
+}
+
+function applySeatLayout() {
+  ['seatsBox','gameSeatsBox','rankedGameSeatsBox'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove('layout-circle','layout-theater','layout-vip','layout-square','layout-long');
+    if (seatLayout !== 'classic') el.classList.add('layout-' + seatLayout);
+  });
+  var s = document.getElementById('seatLayoutSelect');
+  if (s) s.value = seatLayout;
+  var l = document.getElementById('ownerLocationSelect');
+  if (l) l.value = selectedLocation;
+}
+
+function lockRoom() { notify('🔒 قفل شد', 'warning'); }
+function unlockRoom() { notify('🔓 باز شد', 'success'); }
+function changePass() { var p = prompt('رمز جدید:'); if (p) notify('🔑 رمز تغییر کرد', 'success'); }
+function showPass() { alert('رمز: ' + (myLobby.pass || 'ندارد')); }
+function changeScenario() { var s = ['detective','commando','negotiator']; var i = s.indexOf(selectedScenario); selectedScenario = s[(i+1)%3]; renderRoom(); notify('🔄 سناریو عوض شد', 'success'); }
+function giveRewardAmount(a) { if (a < 50) { notify('❌ حداقل ۵۰', 'error'); return; } var idx = parseInt(document.getElementById('playerSelect').value); if (isNaN(idx) || idx < 0) { alert('انتخاب کن'); return; } notify('🪙 ' + a + ' سکه به ' + myLobby.seats[idx], 'success'); }
+function giveCustomReward() { var a = prompt('مقدار سکه:'); if (a && parseInt(a) >= 50) giveRewardAmount(parseInt(a)); }
+function giveAutoReward() { notify('🤖 جایزه خودکار', 'success'); }
+function deleteLobby() { var idx = lobbies.indexOf(myLobby); if (idx > -1) lobbies.splice(idx, 1); myLobby = null; document.getElementById('lobbyRoom').classList.remove('active'); showLobbyList(); notify('🗑️ لابی حذف شد', 'error'); }
+function leaveLobby() { if (myLobby) myLobby.ownerLeft = true; myLobby = null; mySeatIndex = -1; isOwner = false; entryPaid = false; document.getElementById('lobbyRoom').classList.remove('active'); document.getElementById('ownerPanel').classList.remove('active'); showLobbyList(); }
+
+
+function canModerateRankedGame() {
+  if (isOwner) return true;
+  var r = userRanks['شما'] || (isModerator ? 'moderator' : 'user');
+  return ['special','moderator','senior_moderator','team_admin','senior_team_admin'].indexOf(r) !== -1;
+}
+
+function getFriendlyModTarget() {
+  var sel = document.getElementById('rankedModPlayerSelect');
+  if (!sel || !myLobby) return '';
+  var idx = parseInt(sel.value);
+  if (isNaN(idx) || idx < 0 || !myLobby.seats[idx] || myLobby.seats[idx] === 'خالی') return '';
+  return myLobby.seats[idx];
+}
+
+function ensureModTarget() {
+  if (!canModerateRankedGame()) {
+    notify('❌ فقط سازنده و تیم ناظر/ادمین‌ها دسترسی نظارت دارند', 'error');
+    return '';
+  }
+  var target = getFriendlyModTarget();
+  if (!target) {
+    notify('❌ ابتدا بازیکن را انتخاب کنید', 'error');
+    return '';
+  }
+  if (target === 'شما' || target === myLobby.owner) {
+    notify('❌ سازنده قابل محدود کردن نیست', 'error');
+    return '';
+  }
+  return target;
+}
+
+function refreshModeratorTargetList() {
+  var sel = document.getElementById('rankedModPlayerSelect');
+  if (!sel || !myLobby) return;
+  sel.innerHTML = '<option value="">انتخاب بازیکن...</option>';
+  myLobby.seats.forEach(function(name, idx) {
+    if (!name || name === 'خالی') return;
+    var code = (name === myLobby.owner) ? '1' : ('P' + String(idx + 1).padStart(3,'0'));
+    var tags = [];
+    if (rankedModeration.speechBlocked[name]) tags.push('🔇');
+    if (rankedModeration.disciplinaryMute[name]) tags.push('⚠️');
+    if (rankedModeration.voteRemoved[name]) tags.push('🚫رأی');
+    if (rankedModeration.abilityRemoved[name]) tags.push('⚡');
+    sel.innerHTML += '<option value="'+idx+'">'+name+' | کد: '+code+' '+tags.join(' ')+'</option>';
+  });
+}
+
+function updateModeratorTopAlert() {
+  var p = document.getElementById('rankedModPanel');
+  var a = document.getElementById('moderatorTopAlert');
+  if (!p || !a) return;
+  p.style.display = canModerateRankedGame() ? 'block' : 'none';
+  a.textContent = canModerateRankedGame() ? '🛡️ پنل نظارت بازی امتیازی — ناظر در بازی حضور دارد' : '';
+}
+
+function pauseRankedGame() {
+  if (!canModerateRankedGame()) { notify('❌ دسترسی ندارید', 'error'); return; }
+  gamePaused = true;
+  notify('⏸️ بازی امتیازی متوقف شد', 'warning');
+}
+
+function resumeRankedGame() {
+  if (!canModerateRankedGame()) { notify('❌ دسترسی ندارید', 'error'); return; }
+  gamePaused = false;
+  notify('▶️ بازی امتیازی ادامه پیدا کرد', 'success');
+}
+
+function enterRankedGame() {
+  if (!canModerateRankedGame()) { notify('❌ دسترسی ندارید', 'error'); return; }
+  var gr = document.getElementById('rankedGameRoom');
+  if (gr) gr.scrollIntoView({behavior:'smooth', block:'start'});
+  notify('👁️ وارد پنل نظارت بازی شدید', 'success');
+}
+
+function modAllowSpeech() {
+  var t = ensureModTarget(); if (!t) return;
+  delete rankedModeration.speechBlocked[t];
+  delete rankedModeration.disciplinaryMute[t];
+  notify('🗣️ اجازه صحبت به '+t+' داده شد', 'success');
+  refreshModeratorTargetList();
+}
+
+function modBlockSpeech() {
+  var t = ensureModTarget(); if (!t) return;
+  rankedModeration.speechBlocked[t] = true;
+  notify('🔇 صحبت '+t+' قطع شد', 'warning');
+  refreshModeratorTargetList();
+}
+
+function modDisciplinaryMute() {
+  var t = ensureModTarget(); if (!t) return;
+  rankedModeration.disciplinaryMute[t] = true;
+  rankedModeration.speechBlocked[t] = true;
+  notify('⚠️ سکوت انضباطی برای '+t+' فعال شد', 'warning');
+  refreshModeratorTargetList();
+}
+
+function modRemoveDisciplinaryMute() {
+  var t = ensureModTarget(); if (!t) return;
+  delete rankedModeration.disciplinaryMute[t];
+  delete rankedModeration.speechBlocked[t];
+  notify('✅ سکوت انضباطی '+t+' برداشته شد', 'success');
+  refreshModeratorTargetList();
+}
+
+function modTakeVote() {
+  var t = ensureModTarget(); if (!t) return;
+  rankedModeration.voteRemoved[t] = true;
+  notify('🚫 حق رأی '+t+' گرفته شد', 'warning');
+  refreshModeratorTargetList();
+}
+
+function modRestoreVote() {
+  var t = ensureModTarget(); if (!t) return;
+  delete rankedModeration.voteRemoved[t];
+  notify('🗳️ محدودیت رأی '+t+' برداشته شد', 'success');
+  refreshModeratorTargetList();
+}
+
+function modTakeAbility() {
+  var t = ensureModTarget(); if (!t) return;
+  rankedModeration.abilityRemoved[t] = true;
+  notify('⚡ ابلیتی '+t+' گرفته شد', 'warning');
+  refreshModeratorTargetList();
+}
+
+function modRestoreAbility() {
+  var t = ensureModTarget(); if (!t) return;
+  delete rankedModeration.abilityRemoved[t];
+  notify('✨ محدودیت ابلیتی '+t+' برداشته شد', 'success');
+  refreshModeratorTargetList();
+}
+
+function getModerationCodeTarget() {
+  var input = document.getElementById('moderationUserCode');
+  return input ? input.value.trim() : '';
+}
+
+function modBanByCode(duration) {
+  if (!canModerateRankedGame()) { notify('❌ دسترسی بن ندارید', 'error'); return; }
+  var code = getModerationCodeTarget();
+  if (!code) {
+    notify('❌ کد کاربری شخص را وارد کنید', 'error');
+    return;
+  }
+  if (code === '1' && isOwner) {
+    notify('❌ سازنده قابل بن نیست', 'error');
+    return;
+  }
+  rankedModeration.bans[code] = duration;
+  notify('🚫 کد کاربری '+code+' با مدت '+(duration === 'permanent' ? 'دائم' : duration+' روز')+' بن شد', 'error');
+}
+
+function modBanSystem(duration) {
+  modBanByCode(duration);
+}
+
+function modBanCustom() {
+  var input = document.getElementById('moderationCustomBan');
+  var days = parseInt(input && input.value);
+  if (!days || days < 1) {
+    notify('❌ تعداد روز بن را وارد کنید', 'error');
+    return;
+  }
+  modBanByCode(days);
+}
+
+function modUnbanByCode() {
+  if (!canModerateRankedGame()) { notify('❌ دسترسی ندارید', 'error'); return; }
+  var code = getModerationCodeTarget();
+  if (!code) { notify('❌ کد کاربری را وارد کنید', 'error'); return; }
+  if (rankedModeration.bans[code] === undefined) {
+    notify('ℹ️ برای این کد بن فعالی پیدا نشد', 'warning');
+    return;
+  }
+  delete rankedModeration.bans[code];
+  notify('✅ بن کد کاربری '+code+' برداشته شد', 'success');
+}
+
+function pauseGame() { gamePaused = true; notify('⏸️ توقف', 'warning'); }
+function resumeGame() { gamePaused = false; notify('▶️ ادامه', 'success'); }
+function killPlayer() { var idx = parseInt(document.getElementById('rankedModPlayerSelect').value); if (isNaN(idx) || idx < 0) { alert('انتخاب کن'); return; } var t = alivePlayers[idx]; if (t) { if (playerRoles[t] === 'رویین تن') { notify('🛡️ رویین تن نامیراست!', 'warning'); return; } alivePlayers = alivePlayers.filter(function(p){return p !== t;}); deadPlayers.push(t); renderGameSeats(); checkWinner(); } }
+function giveMicToPlayer() { modAllowSpeech(); }
+function silencePlayerMod() { modDisciplinaryMute(); }
+function takeAbilityMod() { modTakeAbility(); }
+function takeVoteRight() { modTakeVote(); }
+function modBanInGame(d) { modBanByCode(d); }
+function penalize(h) { myPenaltyHours = h; notify('⛔ ' + h + ' ساعت جریمه', 'error'); }
+function unpenalize() { myPenaltyHours = 0; notify('✅ جریمه برداشته شد', 'success'); }
+function ban(d) { notify('🚫 بن ' + d, 'error'); }
+
+function startGame() {
+  if (!entryPaid) {
+    if (isOwner) { notify('✅ بازی رایگان برای سازنده', 'success'); }
+    else if (isModerator) { moderatorCoins -= 50; updateCoinDisplay(); notify('💰 ۵۰ سکه کسر شد', 'warning'); }
+    else { if (coins < 50) { notify('❌ سکه کافی نیست', 'error'); return; } coins -= 50; updateCoinDisplay(); }
+    entryPaid = true;
+  }
+  if (!myLobby) return;
+  if (!isOwner) { notify('❌ فقط سازنده', 'error'); return; }
+  if (myLobby.started) { notify('❌ شروع شده', 'error'); return; }
+  myLobby.started = true;
+  gamePaused = false;
+  currentNightNumber = 0;
+  currentDayNumber = 1;
+  isRanked = false;
+  document.getElementById('lobbyRoom').classList.remove('active');
+  document.getElementById('gameRoom').classList.add('active');
+  assignRoles();
+  refreshModeratorTargetList();
+  updateModeratorTopAlert();
+  startNightPhase();
+  notify('🌙 شب معارفه شروع شد!', 'success');
+}
+
+function startRankedSearch(s) {
+  selectedScenario = s;
+  if (isOwner) { notify('✅ بازی رایگان برای سازنده', 'success'); }
+  else if (isModerator) { if (moderatorCoins < 50) { notify('❌ سکه کافی نیست', 'error'); return; } moderatorCoins -= 50; updateCoinDisplay(); notify('💰 ۵۰ سکه کسر شد', 'warning'); }
+  else { if (coins < 50) { notify('❌ سکه کافی نیست', 'error'); return; } coins -= 50; updateCoinDisplay(); notify('💰 ۵۰ سکه کسر شد', 'warning'); }
+  foundPlayers = 0;
+  document.getElementById('rankedSearchBox').style.display = 'block';
+  document.getElementById('rankedSearchBox').innerHTML = '<div class="searching-box"><div class="searching-animation">🔍</div><p>در حال جستجو...</p><div class="progress-bar"><div class="progress-fill" id="rankedProgressFill"></div></div><p>بازیکنان: <span id="rankedFoundCount">0</span>/10</p><button class="btn btn-red" onclick="cancelRankedSearch()" style="margin-top:15px;font-size:14px;">❌ لغو جستجو</button></div>';
+  clearInterval(searchInterval);
+  searchInterval = setInterval(function() {
+    if (document.getElementById('rankedSearchBox').style.display === 'none') { clearInterval(searchInterval); return; }
+    foundPlayers++;
+    if (foundPlayers <= 10) { document.getElementById('rankedFoundCount').textContent = foundPlayers; document.getElementById('rankedProgressFill').style.width = (foundPlayers * 10) + '%'; }
+    if (foundPlayers >= 10) {
+      clearInterval(searchInterval);
+      setTimeout(function() {
+        document.getElementById('rankedSearchBox').style.display = 'none';
+        document.getElementById('rankedGameRoom').classList.add('active');
+        myLobby = { name: 'امتیازی', max: 10, players: samplePlayers.slice(), seats: [], owner: 'شما', started: true };
+        for (var i = 0; i < 10; i++) myLobby.seats.push(samplePlayers[i]);
+        mySeatIndex = 0; isOwner = true; entryPaid = true; gamePaused = false;
+        currentNightNumber = 0; currentDayNumber = 1;
+        isRanked = true;
+        refreshModeratorTargetList();
+        updateModeratorTopAlert();
+        saveRankedTimes();
+        assignRoles();
+        startRankedIntroDay();
+        notify('🌞 معرفی روز حالت امتیازی شروع شد!', 'success');
+      }, 1000);
+    }
+  }, 500);
+}
+
+function assignRoles() {
+  var roles = [];
+  if (selectedScenario === 'detective') roles = ['پزشک','کارآگاه','بازپرس','محقق','رویین تن','شهروند','شهروند','رئیس مافیا','ناتو','شیاد'];
+  else if (selectedScenario === 'commando') roles = ['پزشک','کارآگاه','تکاور','نگهبان','تفنگدار','شهروند','شهروند','رئیس مافیا','گروگان‌گیر','مافیا'];
+  else roles = ['پزشک','کارآگاه','مذاکره‌کننده','زره پوش','خبرنگار','تک تیرانداز','شهروند','شهروند','رئیس مافیا','مافیا'];
+  for (var i = roles.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = roles[i]; roles[i] = roles[j]; roles[j] = t; }
+  alivePlayers = myLobby.players.slice();
+  deadPlayers = []; defendingPlayers = []; playerRoles = {}; votes = {}; playerPoints = {};
+  currentSpeakerIndex = 0; winner = null; mvp = null;
+  nightAbilityLocked = false; myAbilityUsedThisNight = false;
+  savedPlayersThisNight = []; deadPlayersThisNight = [];
+  negotiatorUsed = false; natoUsed = false; investigatorLinkedTo = null;
+  tankUsed = false; sniperUsed = false; guardSavedPlayers = [];
+  doctorSelfSavesLeft = 2; doctorSavesLeft = 2; detectivePicks = [];
+  ksActive = false; dayChallengeDone = false;
+  yakuActive = false; yakuUsedOnce = false;
+  accuserSet = null; defenderSet = null;
+  gunnerUsed = false; gunnerTarget = null; tankCanShoot = false;
+  tricksterTarget = null;
+  guardProtectedPlayers = [];
+  hostageGrabbedPlayers = [];
+  gunnerShootActive = false; gunnerShootTarget = null;
+  for (var i = 0; i < alivePlayers.length && i < roles.length; i++) { playerRoles[alivePlayers[i]] = roles[i]; playerPoints[alivePlayers[i]] = 0; }
+  myRole = playerRoles['شما'] || 'شهروند';
+  notify('🎭 نقش شما: ' + myRole, 'success');
+  renderGameSeats();
+}
+
+function renderGameSeats() {
+  var g = document.getElementById('gameRoom').classList.contains('active');
+  var box = g ? 'gameSeatsBox' : 'rankedGameSeatsBox';
+  var c = document.getElementById(box);
+  if (!c) return;
+  c.innerHTML = '';
+  renderClanBadges();
+  alivePlayers.forEach(function(p) {
+    var s = document.createElement('div');
+    s.className = 'seat occupied';
+    if (p === 'شما') s.classList.add('selected');
+    if (deadPlayers.indexOf(p) > -1) s.classList.add('dead');
+    if (defendingPlayers.indexOf(p) > -1) s.classList.add('defending');
+    var src = (p === 'شما') ? myAvatar : 'avatars/avatar1.png';
+    s.innerHTML = '<img src="' + src + '" style="width:50px;height:50px;border-radius:50%;object-fit:cover;" onerror="this.src=\'avatars/avatar1.png\'"><div class="name">' + p + '</div><div style="font-size:10px;opacity:.85;">🔑 کد: ' + getUserCodeByName(p) + '</div>';
+    c.appendChild(s);
+  });
+}
+
+function startNightPhase() {
+  var g = document.getElementById('gameRoom').classList.contains('active');
+  var t = g ? 'gamePhaseTitle' : 'rankedGamePhaseTitle';
+  var i = g ? 'gamePhaseInfo' : 'rankedGamePhaseInfo';
+  var te = g ? 'gameTimerDisplay' : 'rankedGameTimerDisplay';
+  currentNightNumber++;
+  nightAbilityLocked = (currentNightNumber === 0);
+  if (currentNightNumber === 0) { document.getElementById(t).textContent = '🌙 شب معارفه'; document.getElementById(i).textContent = 'ابلیتی‌ها قفل هستند'; }
+  else if (yakuActive) { document.getElementById(t).textContent = '🌙 شب ' + currentNightNumber + ' (یاکوزایی)'; document.getElementById(i).textContent = 'شلیک ندارید'; }
+  else { document.getElementById(t).textContent = '🌙 شب ' + currentNightNumber; document.getElementById(i).textContent = 'ابلیتی‌ها فعال هستند'; }
+  myAbilityUsedThisNight = false;
+  var nightTime = (myRole === 'رئیس مافیا' || myRole === 'مافیا' || myRole === 'ناتو' || myRole === 'شیاد' || myRole === 'گروگان‌گیر') ? timeMafiaNight : timeCitizenNight;
+  document.getElementById(te).textContent = nightTime;
+  showMyAbility();
+  var timer = nightTime;
+  clearInterval(phaseTimerInterval);
+  phaseTimerInterval = setInterval(function() {
+    if (!gamePaused) {
+      timer--;
+      document.getElementById(te).textContent = timer;
+      if (timer <= 0) { clearInterval(phaseTimerInterval); yakuActive = false; startDayPhase(); }
+    }
+  }, 1000);
+}
+
+function startRankedIntroDay() {
+  var te = document.getElementById('rankedGameTimerDisplay');
+  var title = document.getElementById('rankedGamePhaseTitle');
+  var info = document.getElementById('rankedGamePhaseInfo');
+  if (!te || !title || !info) return;
+  clearInterval(phaseTimerInterval);
+  var timer = Math.max(1, rankedIntroDayTime);
+  title.textContent = '🌞 معرفی روز';
+  info.textContent = 'معرفی اولیه بازیکنان';
+  document.getElementById('rankedSpeakingIndicator').textContent = '';
+  te.textContent = timer;
+  phaseTimerInterval = setInterval(function(){
+    if (!gamePaused) {
+      timer--; te.textContent = timer;
+      if (timer <= 0) { clearInterval(phaseTimerInterval); startRankedIntroNight(); }
+    }
+  },1000);
+}
+
+function startRankedIntroNight() {
+  var te = document.getElementById('rankedGameTimerDisplay');
+  var title = document.getElementById('rankedGamePhaseTitle');
+  var info = document.getElementById('rankedGamePhaseInfo');
+  if (!te || !title || !info) return;
+  clearInterval(phaseTimerInterval);
+  var timer = Math.max(1, rankedIntroNightTime);
+  title.textContent = '🌙 معرفی شب';
+  info.textContent = 'معرفی شب و آماده‌سازی بازی';
+  te.textContent = timer;
+  phaseTimerInterval = setInterval(function(){
+    if (!gamePaused) {
+      timer--; te.textContent = timer;
+      if (timer <= 0) { clearInterval(phaseTimerInterval); currentNightNumber = 0; startRankedNightPhase(); }
+    }
+  },1000);
+}
+
+function startRankedNightPhase() { startNightPhase(); }
+
+function startDayPhase() {
+  var g = document.getElementById('gameRoom').classList.contains('active');
+  var t = g ? 'gamePhaseTitle' : 'rankedGamePhaseTitle';
+  var i = g ? 'gamePhaseInfo' : 'rankedGamePhaseInfo';
+  var te = g ? 'gameTimerDisplay' : 'rankedGameTimerDisplay';
+  var sp = g ? 'speakingIndicator' : 'rankedSpeakingIndicator';
+  currentDayNumber++;
+  dayChallengeDone = false;
+  if (gunnerShootActive && gunnerShootTarget === 'شما') {
+    var h = '<div class="ability-box"><h4>🔫 شلیک تفنگدار</h4>';
+    var targets = alivePlayers.filter(function(p) { return p !== 'شما'; });
+    targets.forEach(function(t2) { h += '<button class="ability-btn" onclick="gunnerShoot(\'' + t2 + '\')">' + t2 + '</button>'; });
+    h += '</div>';
+    var g2 = document.getElementById('gameRoom').classList.contains('active');
+    var area = g2 ? document.getElementById('abilityArea') : document.getElementById('rankedAbilityArea');
+    area.innerHTML = h;
+  }
+  document.getElementById(t).textContent = '☀️ روز ' + currentDayNumber;
+  document.getElementById(i).textContent = 'هر بازیکن ' + timeSpeak + ' ثانیه صحبت می‌کند';
+  document.getElementById(sp).textContent = '🎤 نوبت: ' + alivePlayers[0];
+  speakTimer = timeSpeak;
+  currentSpeakerIndex = 0;
+  document.getElementById(te).textContent = speakTimer;
+  clearInterval(phaseTimerInterval);
+  phaseTimerInterval = setInterval(function() {
+    if (!gamePaused) {
+      speakTimer--;
+      document.getElementById(te).textContent = speakTimer;
+      if (speakTimer <= 0) {
+        currentSpeakerIndex++;
+        if (currentSpeakerIndex >= alivePlayers.length) { clearInterval(phaseTimerInterval); if (!checkKS()) startVotePhase(); }
+        else { speakTimer = timeSpeak; document.getElementById(sp).textContent = '🎤 نوبت: ' + alivePlayers[currentSpeakerIndex]; document.getElementById(te).textContent = speakTimer; }
+      }
+    }
+  }, 1000);
+}
+
+function startVotePhase() {
+  var g = document.getElementById('gameRoom').classList.contains('active');
+  var t = g ? 'gamePhaseTitle' : 'rankedGamePhaseTitle';
+  var d = g ? 'defenseArea' : 'rankedDefenseArea';
+  votes = {};
+  currentVoterIndex = 0;
+  document.getElementById(t).textContent = '🗳️ رای‌گیری';
+  document.getElementById(d).innerHTML = '';
+  showNextVoter();
+}
+
+function showNextVoter() {
+  var g = document.getElementById('gameRoom').classList.contains('active');
+  var te = g ? 'gameTimerDisplay' : 'rankedGameTimerDisplay';
+  var a = g ? 'voteArea' : 'rankedVoteArea';
+  var i = g ? 'gamePhaseInfo' : 'rankedGamePhaseInfo';
+  if (currentVoterIndex >= alivePlayers.length) { finishVoting(); return; }
+  var v = alivePlayers[currentVoterIndex];
+  var vst = moderatorState[v] || {};
+  if (vst.voteDisabled) { votes[v] = null; currentVoterIndex++; showNextVoter(); return; }
+  document.getElementById(i).textContent = 'نوبت رای: ' + v;
+  var h = '<div class="vote-box"><h4>🎯 ' + v + ' رای بده</h4>';
+  for (var k = 0; k < alivePlayers.length; k++) { if (alivePlayers[k] !== v) h += '<button class="vote-btn" onclick="castVote(\'' + v + '\',\'' + alivePlayers[k] + '\')">' + alivePlayers[k] + '</button>'; }
+  h += '<button class="vote-btn" onclick="castVote(\'' + v + '\',null)">⏭️ رای نمی‌دهم</button></div>';
+  document.getElementById(a).innerHTML = h;
+  voteTimer = 20;
+  document.getElementById(te).textContent = voteTimer;
+  clearInterval(phaseTimerInterval);
+  phaseTimerInterval = setInterval(function() { if (!gamePaused) { voteTimer--; document.getElementById(te).textContent = voteTimer; if (voteTimer <= 0) { clearInterval(phaseTimerInterval); castVote(v, null); } } }, 1000);
+}
+
+function castVote(v, t) { clearInterval(phaseTimerInterval); votes[v] = t; currentVoterIndex++; showNextVoter(); }
+
+function finishVoting() {
+  var g = document.getElementById('gameRoom').classList.contains('active');
+  var a = g ? 'voteArea' : 'rankedVoteArea';
+  var d = g ? 'defenseArea' : 'rankedDefenseArea';
+  var vc = {};
+  for (var v in votes) { var t = votes[v]; if (t) vc[t] = (vc[t] || 0) + 1; }
+  var nv = alivePlayers.length >= 8 ? 4 : alivePlayers.length >= 6 ? 3 : 2;
+  defendingPlayers = [];
+  for (var p in vc) { if (vc[p] >= nv) defendingPlayers.push(p); }
+  document.getElementById(a).innerHTML = '';
+  if (defendingPlayers.length === 0) { document.getElementById(d).innerHTML = '<div class="defense-box"><h3>❌ کسی رای کافی نیاورد</h3></div>'; setTimeout(function() { startNightPhase(); }, 2000); }
+  else startDefensePhase();
+}
+
+function startDefensePhase() {
+  var g = document.getElementById('gameRoom').classList.contains('active');
+  var t = g ? 'gamePhaseTitle' : 'rankedGamePhaseTitle';
+  var i = g ? 'gamePhaseInfo' : 'rankedGamePhaseInfo';
+  currentDefenderIndex = 0; accuserSet = null; defenderSet = null;
+  renderGameSeats();
+  document.getElementById(t).textContent = '⚖️ دفاعیه';
+  document.getElementById(i).textContent = defendingPlayers.length + ' نفر - نوبتی دفاع';
+  showNextDefender();
+}
+
+function showNextDefender() {
+  var g = document.getElementById('gameRoom').classList.contains('active');
+  var te = g ? 'gameTimerDisplay' : 'rankedGameTimerDisplay';
+  var d = g ? 'defenseArea' : 'rankedDefenseArea';
+  var i = g ? 'gamePhaseInfo' : 'rankedGamePhaseInfo';
+  if (currentDefenderIndex >= defendingPlayers.length) {
+    if (myRole === 'بازپرس' && !myAbilityUsedThisNight && defendingPlayers.length === 2) { detectiveDecision(); return; }
+    startExitVote(); return;
+  }
+  var df = defendingPlayers[currentDefenderIndex];
+  document.getElementById(i).textContent = 'دفاعیه: ' + df;
+  var h = '<div class="defense-box"><h3>⚖️ ' + df + ' در حال دفاع</h3>';
+  if (defendingPlayers.length === 1) {
+    var others = alivePlayers.filter(function(p) { return p !== df; });
+    h += '<p style="font-size:12px;">اتهام‌زننده و دفاع‌کننده انتخاب کن</p>';
+    h += '<div style="margin-top:10px;"><strong>اتهام‌زننده:</strong><br>';
+    others.forEach(function(p) { h += '<button class="ability-btn" onclick="setAccuser(\'' + p + '\')">' + p + '</button>'; });
+    h += '</div>';
+    if (accuserSet) {
+      h += '<div style="margin-top:10px;"><strong>دفاع‌کننده:</strong><br>';
+      others.forEach(function(p) { if (p !== accuserSet) h += '<button class="ability-btn" onclick="setDefender(\'' + p + '\')">' + p + '</button>'; });
+      h += '</div>';
+    }
+  } else h += '<p style="font-size:12px;">۱۵ ثانیه فرصت دفاع</p>';
+  h += '</div>';
+  document.getElementById(d).innerHTML = h;
+  if (defendingPlayers.length === 1) { if (!accuserSet) return; if (!defenderSet) return; }
+  defenseTimer = 40;
+  document.getElementById(te).textContent = defenseTimer;
+  clearInterval(phaseTimerInterval);
+  phaseTimerInterval = setInterval(function() { if (!gamePaused) { defenseTimer--; document.getElementById(te).textContent = defenseTimer; if (defenseTimer <= 0) { clearInterval(phaseTimerInterval); accuserSet = null; defenderSet = null; currentDefenderIndex++; showNextDefender(); } } }, 1000);
+}
+
+function detectiveDecision() {
+  var g = document.getElementById('gameRoom').classList.contains('active');
+  var area = g ? document.getElementById('voteArea') : document.getElementById('rankedVoteArea');
+  var h = '<div class="defense-box"><h3>🔍 بازپرس تصمیم می‌گیرد</h3>';
+  h += '<button class="ability-btn" style="background:#27ae60;color:white;" onclick="detectiveDecide(true)">✅ رای‌گیری انجام شود</button>';
+  h += '<button class="ability-btn" style="background:#e74c3c;color:white;" onclick="detectiveDecide(false)">❌ رای‌گیری لغو شود</button>';
+  h += '</div>';
+  area.innerHTML = h;
+}
+
+function detectiveDecide(yes) { myAbilityUsedThisNight = true; if (yes) { notify('✅ رای‌گیری انجام شود', 'success'); startExitVote(); } else { notify('❌ رای‌گیری لغو شد', 'warning'); startNightPhase(); } }
+
+function startExitVote() {
+  var g = document.getElementById('gameRoom').classList.contains('active');
+  var t = g ? 'gamePhaseTitle' : 'rankedGamePhaseTitle';
+  var te = g ? 'gameTimerDisplay' : 'rankedGameTimerDisplay';
+  var a = g ? 'voteArea' : 'rankedVoteArea';
+  var d = g ? 'defenseArea' : 'rankedDefenseArea';
+  var i = g ? 'gamePhaseInfo' : 'rankedGamePhaseInfo';
+  document.getElementById(t).textContent = '🗳️ رای خروج';
+  document.getElementById(i).textContent = 'رای‌گیری برای خروج';
+  var h = '<div class="vote-box"><h4>🗳️ به کی رای خروج می‌دهی؟</h4>';
+  defendingPlayers.forEach(function(p) { h += '<button class="vote-btn" style="border-color:#e74c3c;color:#e74c3c;" onclick="exitVote(\'' + p + '\')">' + p + '</button>'; });
+  h += '</div>';
+  document.getElementById(a).innerHTML = h;
+  document.getElementById(d).innerHTML = '';
+  var timer = 15;
+  document.getElementById(te).textContent = timer;
+  clearInterval(phaseTimerInterval);
+  phaseTimerInterval = setInterval(function() { if (!gamePaused) { timer--; document.getElementById(te).textContent = timer; if (timer <= 0) { clearInterval(phaseTimerInterval); startNightPhase(); } } }, 1000);
+}
+
+function exitVote(target) {
+  clearInterval(phaseTimerInterval);
+  var g = document.getElementById('gameRoom').classList.contains('active');
+  var a = g ? 'voteArea' : 'rankedVoteArea';
+  var d = g ? 'defenseArea' : 'rankedDefenseArea';
+  document.getElementById(a).innerHTML = '';
+  var r = playerRoles[target] || 'نامشخص';
+  if (r === 'زره پوش') { notify('🛡️ زره پوش یک بار در روز خارج نمیشه!', 'warning'); defendingPlayers = []; startNightPhase(); return; }
+  if (target === 'شما' && investigatorLinkedTo) { if (playerRoles[investigatorLinkedTo] !== 'رئیس مافیا') { alivePlayers = alivePlayers.filter(function(p) { return p !== investigatorLinkedTo; }); deadPlayers.push(investigatorLinkedTo); notify('🕵🏻 ' + investigatorLinkedTo + ' هم با تو خارج شد!', 'warning'); } }
+  alivePlayers = alivePlayers.filter(function(p) { return p !== target; });
+  deadPlayers.push(target);
+  defendingPlayers = [];
+  document.getElementById(d).innerHTML = '<div class="defense-box"><h3>💀 ' + target + ' خارج شد</h3><p>نقش: ' + r + '</p></div>';
+  renderGameSeats();
+  checkDetectiveReturn();
+  setTimeout(function() { checkWinner(); }, 2000);
+}
+
+function checkWinner() {
+  var m = 0, c = 0;
+  for (var i = 0; i < alivePlayers.length; i++) {
+    var r = playerRoles[alivePlayers[i]] || '';
+    if (r === 'رئیس مافیا' || r === 'مافیا' || r === 'ناتو' || r === 'شیاد' || r === 'گروگان‌گیر' || r === 'مذاکره‌کننده') m++;
+    else c++;
+  }
+  if (m === 0) { winner = 'شهروندان'; endGame(); }
+  else if (m >= c) { winner = 'مافیا'; endGame(); }
+  else { startNightPhase(); }
+}
+
+function endGame() {
+  clearInterval(phaseTimerInterval);
+  var mp = -1;
+  for (var p in playerPoints) { if (playerPoints[p] > mp) { mp = playerPoints[p]; mvp = p; } }
+  if (!isOwner && !isModerator) { if (winner === 'شهروندان') coins += 100; else coins -= 50; updateCoinDisplay(); }
+  var g = document.getElementById('gameRoom').classList.contains('active');
+  var ea = g ? 'endGameArea' : 'rankedEndGameArea';
+  var pb = g ? 'gamePhaseBox' : 'rankedGamePhaseBox';
+  var pbEl = document.getElementById(pb);
+  if (pbEl) pbEl.style.display = 'none';
+  var h = '<div class="end-game-box"><h2>' + (winner === 'شهروندان' ? '🏆' : '💀') + ' پایان بازی</h2><p class="winner-text" style="color:' + (winner === 'شهروندان' ? '#27ae60' : '#e74c3c') + '">برنده: ' + winner + '</p><p class="mvp-text">⭐ MVP: ' + (mvp || '-') + '</p><button class="play-again-btn" onclick="playAgain()">🔄 بازی مجدد</button></div>';
+  document.getElementById(ea).innerHTML = h;
+  notify('🏆 ' + winner + ' بردند!', 'success');
+}
+
+function playAgain() {
+  document.getElementById('gameRoom').classList.remove('active');
+  document.getElementById('rankedGameRoom').classList.remove('active');
+  document.getElementById('gamePhaseBox').style.display = 'block';
+  document.getElementById('rankedGamePhaseBox').style.display = 'block';
+  document.getElementById('endGameArea').innerHTML = '';
+  document.getElementById('rankedEndGameArea').innerHTML = '';
+  showLobbyList();
+}
+
+function updateModSelect() {
+  var s = document.getElementById('penaltySelect');
+  if (s) { s.innerHTML = '<option value="">انتخاب...</option>'; for (var i = 0; i < samplePlayers.length; i++) s.innerHTML += '<option value="' + i + '">' + samplePlayers[i] + '</option>'; }
+  var s2 = document.getElementById('banSelect');
+  if (s2) { s2.innerHTML = '<option value="">انتخاب...</option>'; for (var j = 0; j < samplePlayers.length; j++) s2.innerHTML += '<option value="' + j + '">' + samplePlayers[j] + '</option>'; }
+}
+
+window.onload = function() { updateModSelect(); updateCoinDisplay(); ensureProfileModals(); };function banUserByCode(code, days) {
+  if (!code) { notify('❌ کد کاربری را وارد کنید', 'error'); return; }
+  if (!days || days < 1) { notify('❌ مدت بن را وارد کنید', 'error'); return; }
+  banList[code] = { days: days, startTime: Date.now(), endTime: Date.now() + (days * 24 * 60 * 60 * 1000), permanent: days === 999 };
+  var label = days === 999 ? 'دائم' : days + ' روز';
+  notify('🚫 کاربر ' + code + ' به مدت ' + label + ' بن شد', 'error');
+  updateBanListDisplay();
+}
+
+function banUserQuick(days) {
+  if (!isOwner && !isModerator) { notify('❌ فقط ناظر یا سازنده', 'error'); return; }
+  var code = document.getElementById('banUserCode').value.trim();
+  if (!code) { notify('❌ کد کاربری را وارد کنید', 'error'); return; }
+  banUserByCode(code, days);
+}
+
+function banUserCustom() {
+  if (!isOwner && !isModerator) { notify('❌ فقط ناظر یا سازنده', 'error'); return; }
+  var code = document.getElementById('banUserCode').value.trim();
+  if (!code) { notify('❌ کد کاربری را وارد کنید', 'error'); return; }
+  var days = parseInt(prompt('مدت بن (روز) — برای دائم 999 وارد کنید:'));
+  if (!days || days < 1) { notify('❌ مدت نامعتبر', 'error'); return; }
+  banUserByCode(code, days);
+}
+
+function banUserPermanent() {
+  if (!isOwner && !isModerator) { notify('❌ فقط ناظر یا سازنده', 'error'); return; }
+  var code = document.getElementById('banUserCode').value.trim();
+  if (!code) { notify('❌ کد کاربری را وارد کنید', 'error'); return; }
+  banUserByCode(code, 999);
+}
+
+function unbanUser(code) {
+  if (!code) { notify('❌ کد کاربری را وارد کنید', 'error'); return; }
+  if (banList[code]) { delete banList[code]; notify('✅ بن ' + code + ' برداشته شد', 'success'); updateBanListDisplay(); }
+  else notify('❌ این کاربر بن نیست', 'error');
+}
+
+function updateBanListDisplay() {
+  var list = document.getElementById('banListDisplay');
+  if (!list) return;
+  var h = '', count = 0;
+  for (var code in banList) {
+    count++;
+    var b = banList[code];
+    var remaining = b.permanent ? 'دائم' : Math.ceil((b.endTime - Date.now()) / (24 * 60 * 60 * 1000)) + ' روز';
+    h += '<div style="background:#fde8e8;border:1px solid #e74c3c;border-radius:6px;padding:5px;margin:3px 0;font-size:11px;">';
+    h += '🚫 <strong>' + code + '</strong> — ' + remaining;
+    h += ' <button onclick="unbanUser(\'' + code + '\')" style="background:#27ae60;color:white;border:none;border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer;">رفع بن</button>';
+    h += '</div>';
+  }
+  if (count === 0) h = '<p style="font-size:11px;color:#999;">هیچ کاربری بن نیست</p>';
+  list.innerHTML = h;
+}
+
+function giveMicToPlayer() {
+  if (!isOwner && !isModerator) { notify('❌ فقط ناظر یا سازنده', 'error'); return; }
+  var idx = parseInt(document.getElementById('rankedModPlayerSelect').value);
+  if (isNaN(idx) || idx < 0) { alert('انتخاب کن'); return; }
+  var t = alivePlayers[idx];
+  if (!t) return;
+  moderatorMicBlocked[t] = false;
+  notify('🎤 مایک ' + t + ' باز شد', 'success');
+}
+
+function blockMicPlayer() {
+  if (!isOwner && !isModerator) { notify('❌ فقط ناظر یا سازنده', 'error'); return; }
+  var idx = parseInt(document.getElementById('rankedModPlayerSelect').value);
+  if (isNaN(idx) || idx < 0) { alert('انتخاب کن'); return; }
+  var t = alivePlayers[idx];
+  if (!t) return;
+  moderatorMicBlocked[t] = true;
+  notify('🔇 مایک ' + t + ' بسته شد', 'warning');
+}
+
+function silencePlayerMod() {
+  if (!isOwner && !isModerator) { notify('❌ فقط ناظر یا سازنده', 'error'); return; }
+  var idx = parseInt(document.getElementById('rankedModPlayerSelect').value);
+  if (isNaN(idx) || idx < 0) { alert('انتخاب کن'); return; }
+  var t = alivePlayers[idx];
+  if (!t) return;
+  moderatorSilenced[t] = true;
+  notify('🤫 سکوت انضباطی برای ' + t, 'warning');
+}
+
+function unsilencePlayerMod() {
+  if (!isOwner && !isModerator) { notify('❌ فقط ناظر یا سازنده', 'error'); return; }
+  var idx = parseInt(document.getElementById('rankedModPlayerSelect').value);
+  if (isNaN(idx) || idx < 0) { alert('انتخاب کن'); return; }
+  var t = alivePlayers[idx];
+  if (!t) return;
+  moderatorSilenced[t] = false;
+  notify('🔊 سکوت ' + t + ' برداشته شد', 'success');
+}
+
+function takeAbilityMod() {
+  if (!isOwner && !isModerator) { notify('❌ فقط ناظر یا سازنده', 'error'); return; }
+  var idx = parseInt(document.getElementById('rankedModPlayerSelect').value);
+  if (isNaN(idx) || idx < 0) { alert('انتخاب کن'); return; }
+  var t = alivePlayers[idx];
+  if (!t) return;
+  moderatorAbilityDisabled[t] = true;
+  notify('⚡ ابلیتی ' + t + ' گرفته شد', 'warning');
+}
+
+function restoreAbilityMod() {
+  if (!isOwner && !isModerator) { notify('❌ فقط ناظر یا سازنده', 'error'); return; }
+  var idx = parseInt(document.getElementById('rankedModPlayerSelect').value);
+  if (isNaN(idx) || idx < 0) { alert('انتخاب کن'); return; }
+  var t = alivePlayers[idx];
+  if (!t) return;
+  moderatorAbilityDisabled[t] = false;
+  notify('⚡ ابلیتی ' + t + ' برگشت', 'success');
+}
+
+function takeVoteRight() {
+  if (!isOwner && !isModerator) { notify('❌ فقط ناظر یا سازنده', 'error'); return; }
+  var idx = parseInt(document.getElementById('rankedModPlayerSelect').value);
+  if (isNaN(idx) || idx < 0) { alert('انتخاب کن'); return; }
+  var t = alivePlayers[idx];
+  if (!t) return;
+  moderatorVoteDisabled[t] = true;
+  notify('🚫 حق رأی ' + t + ' گرفته شد', 'error');
+}
+
+function restoreVoteRight() {
+  if (!isOwner && !isModerator) { notify('❌ فقط ناظر یا سازنده', 'error'); return; }
+  var idx = parseInt(document.getElementById('rankedModPlayerSelect').value);
+  if (isNaN(idx) || idx < 0) { alert('انتخاب کن'); return; }
+  var t = alivePlayers[idx];
+  if (!t) return;
+  moderatorVoteDisabled[t] = false;
+  notify('🗳️ حق رأی ' + t + ' برگشت', 'success');
+}
+
+function revivePlayer() {
+  if (!isOwner && !isModerator) { notify('❌ فقط ناظر یا سازنده', 'error'); return; }
+  var idx = parseInt(document.getElementById('rankedModPlayerSelect').value);
+  if (isNaN(idx) || idx < 0) { alert('انتخاب کن'); return; }
+  var t = alivePlayers[idx];
+  if (!t) {
+    t = deadPlayers[idx];
+    if (!t) return;
+    alivePlayers.push(t);
+    deadPlayers = deadPlayers.filter(function(p) { return p !== t; });
+    notify('💚 ' + t + ' زنده شد', 'success');
+    renderGameSeats();
+  } else notify('❌ این بازیکن زنده است', 'error');
+}
+
+
+/* ===== سیستم کلن سایت ===== */
+var siteClan = null;
+try { siteClan = JSON.parse(localStorage.getItem('msh_site_clan') || 'null'); } catch(e) { siteClan = null; }
+
+function saveSiteClan() {
+  try { localStorage.setItem('msh_site_clan', JSON.stringify(siteClan)); } catch(e) {}
+}
+
+function getClanModerators() {
+  var out = [];
+  for (var n in userRanks) {
+    var r = userRanks[n];
+    if (r === 'moderator' || r === 'senior_moderator' || r === 'team_admin' || r === 'senior_team_admin') {
+      if (n && n !== 'شما') out.push(n);
+    }
+  }
+  for (var m in moderatorState) {
+    if (moderatorState[m] && moderatorState[m].isModerator && m && m !== 'شما' && out.indexOf(m) === -1) out.push(m);
+  }
+  if (myLobby && myLobby.moderators) myLobby.moderators.forEach(function(n){ if(n && n !== 'شما' && out.indexOf(n)===-1) out.push(n); });
+  return out;
+}
+
+function isClanLeader() {
+  return !!siteClan && !!currentUserName && siteClan.leader === currentUserName;
+}
+
+function isClanDeputy() {
+  return !!siteClan && !!currentUserName && (siteClan.deputies || []).indexOf(currentUserName) !== -1;
+}
+
+function canClanManage() { return isClanLeader(); }
+
+function clanBadgeHtml() {
+  if (!siteClan || !siteClan.badge) return '✓';
+  return siteClan.badge;
+}
+
+function openClanPanel() {
+  var m = document.getElementById('clanModal');
+  if (!m) return;
+  var h = '<div class="modal-content" style="max-width:620px;max-height:85vh;overflow:auto;">';
+  h += '<h2 style="text-align:center;">🏰 کلن</h2>';
+  if (!siteClan) {
+    if (!isOwner) {
+      h += '<div class="role-desc"><p style="text-align:center;font-size:15px;">هنوز کلنی ساخته نشده است.</p><p style="text-align:center;">👑 فقط سازنده سایت می‌تواند کلن بسازد.</p></div>';
+    } else {
+      h += '<div class="role-desc"><h3>👑 ساخت کلن سایت</h3><p>هزینه ساخت کلن: <strong>💎 ۱۵۰ جم</strong></p><p>این ۱۵۰ جم از موجودی شما کسر نمی‌شود.</p>';
+      h += '<div class="form-group"><label>نام گروه:</label><input id="clanNameInput" maxlength="30" placeholder="نام کلن"></div>';
+      h += '<div class="form-group"><label>شعار گروه:</label><input id="clanSloganInput" maxlength="80" placeholder="شعار کلن"></div>';
+      h += '<div class="form-group"><label>تیک گروه:</label><select id="clanBadgeInput"><option>✓</option><option>☑️</option><option>⭐</option><option>👑</option><option>🛡️</option><option>🔥</option><option>💠</option></select></div>';
+      h += '<button class="btn btn-green" style="width:100%;" onclick="createSiteClan()">🏰 ساخت کلن با ۱۵۰ جم</button></div>';
+    }
+  } else {
+    h += '<div style="background:linear-gradient(135deg,#eef2ff,#fff);padding:15px;border-radius:14px;text-align:center;border:2px solid #9b59b6;">';
+    h += '<div style="font-size:32px;">'+clanBadgeHtml()+'</div><h2>'+siteClan.name+'</h2><p>'+siteClan.slogan+'</p>';
+    h += '<p>👑 لیدر: <strong>'+siteClan.leader+'</strong></p><p>📊 سطح کلن: <strong>'+siteClan.level+'</strong></p>';
+    h += '<p>🚪 ورود: <strong>'+({open:'باز',request:'فقط با درخواست',closed:'بسته'}[siteClan.entryStatus]||'باز')+'</strong></p>';
+    h += '<p>💬 چت: '+(siteClan.chatEnabled?'فعال':'بسته')+' | 😀 ایموجی: '+(siteClan.emojiEnabled?'فعال':'بسته')+'</p></div>';
+    h += '<div class="role-desc"><h3>🤝 همکاران کلن (ناظران)</h3>';
+    var mods=getClanModerators();
+    if (!mods.length) h += '<p>هنوز ناظری به عنوان همکار شناسایی نشده است.</p>';
+    else mods.forEach(function(n){ h += '<div style="padding:8px;margin:5px 0;background:#f5f5f5;border-radius:8px;">🛡️ '+n+(siteClan.deputies.indexOf(n)!==-1?' — <strong>معاون</strong>':' — همکار')+'</div>'; });
+    h += '</div>';
+    if (canClanManage()) {
+      h += '<div class="role-desc"><h3>👑 مدیریت کامل لیدر کلن</h3>';
+      h += '<p>لیدر همه دسترسی‌های کلن را دارد: ارتقا به معاون، تنزل معاون، انتقال مالکیت، مدیریت چت و ایموجی، اخراج، وضعیت ورود، سطح و ویرایش گروه.</p>';
+      h += '<div class="form-group"><label>ارتقا به معاون:</label><select id="clanPromoteSelect"><option value="">انتخاب همکار</option>'+mods.filter(function(n){return siteClan.deputies.indexOf(n)===-1;}).map(function(n){return '<option>'+n+'</option>';}).join('')+'</select></div>';
+      h += '<button class="btn btn-blue" style="width:100%;margin-bottom:7px;" onclick="promoteClanDeputy()">⬆️ ارتقا به معاون</button>';
+      h += '<div class="form-group"><label>تنزل معاون:</label><select id="clanDemoteSelect"><option value="">انتخاب معاون</option>'+siteClan.deputies.map(function(n){return '<option>'+n+'</option>';}).join('')+'</select></div>';
+      h += '<button class="btn btn-purple" style="width:100%;margin-bottom:7px;" onclick="demoteClanDeputy()">⬇️ تنزل معاون</button>';
+      h += '<div class="form-group"><label>انتقال مالکیت به:</label><select id="clanTransferSelect"><option value="">انتخاب همکار/معاون</option>'+mods.map(function(n){return '<option>'+n+'</option>';}).join('')+'</select></div>';
+      h += '<button class="btn btn-red" style="width:100%;margin-bottom:7px;" onclick="transferClanOwnership()">🔄 انتقال مالکیت گروه</button>';
+      h += '<div style="background:#eef7ff;border:2px solid #3498db;border-radius:10px;padding:10px;margin:8px 0;"><h4 style="margin:0 0 8px;text-align:center;">✏️ ویرایش گروه</h4>';
+      h += '<div class="form-group"><label>نام گروه:</label><input id="clanEditName" maxlength="30" value="'+(siteClan.name||'')+'"></div>';
+      h += '<div class="form-group"><label>شعار گروه:</label><input id="clanEditSlogan" maxlength="80" value="'+(siteClan.slogan||'')+'"></div>';
+      h += '<div class="form-group"><label>سطح کلن (۱ تا بی‌نهایت):</label><input id="clanLevelSelect" type="number" min="1" step="1" value="'+(siteClan.level||1)+'"></div>';
+      h += '<div class="form-group"><label>تیک گروه:</label><select id="clanEditBadge"><option value="✓" '+(siteClan.badge==='✓'?'selected':'')+'>✓</option><option value="☑️" '+(siteClan.badge==='☑️'?'selected':'')+'>☑️</option><option value="⭐" '+(siteClan.badge==='⭐'?'selected':'')+'>⭐</option><option value="👑" '+(siteClan.badge==='👑'?'selected':'')+'>👑</option><option value="🛡️" '+(siteClan.badge==='🛡️'?'selected':'')+'>🛡️</option><option value="🔥" '+(siteClan.badge==='🔥'?'selected':'')+'>🔥</option><option value="💠" '+(siteClan.badge==='💠'?'selected':'')+'>💠</option></select></div></div>';
+      h += '<div class="form-group"><label>وضعیت ورود:</label><select id="clanEntrySelect"><option value="open" '+(siteClan.entryStatus==='open'?'selected':'')+'>باز</option><option value="request" '+(siteClan.entryStatus==='request'?'selected':'')+'>فقط با درخواست</option><option value="closed" '+(siteClan.entryStatus==='closed'?'selected':'')+'>بسته</option></select></div>';
+      if (isOwner) { h += '<div class="form-group"><label>⭐ سطح کاربری سازنده (۱ تا بی‌نهایت):</label><input id="siteOwnerLevelInput" type="number" min="1" step="1" value="'+currentUserLevel+'"></div>'; }
+      h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;"><button class="btn '+(siteClan.chatEnabled?'btn-green':'btn-red')+'" onclick="toggleClanChat()">💬 چت '+(siteClan.chatEnabled?'فعال':'بسته')+'</button><button class="btn '+(siteClan.emojiEnabled?'btn-green':'btn-red')+'" onclick="toggleClanEmoji()">😀 ایموجی '+(siteClan.emojiEnabled?'فعال':'بسته')+'</button></div>';
+      h += '<button class="btn btn-blue" style="width:100%;" onclick="saveClanSettings()">✏️ ویرایش گروه و ذخیره</button>';
+      h += '</div>';
+    }
+    h += '<div class="role-desc"><h3>📌 قوانین دسترسی</h3><p>👑 لیدر کلن: همه دسترسی‌ها</p><p>🤝 همکاران: همان ناظران</p><p>👥 کاربران عادی: عضو کلن بدون دسترسی مدیریتی</p></div>';
+  }
+  h += '<button class="btn btn-red" style="width:100%;margin-top:12px;" onclick="closeClanPanel()">بستن</button></div>';
+  m.innerHTML=h; m.classList.add('active');
+}
+function closeClanPanel(){ var m=document.getElementById('clanModal'); if(m)m.classList.remove('active'); }
+function createSiteClan(){
+  if(!isOwner){notify('❌ فقط سازنده سایت می‌تواند کلن بسازد','error');return;}
+  if(siteClan){notify('❌ فقط یک کلن قابل ساخت است','error');return;}
+  var name=(document.getElementById('clanNameInput').value||'').trim();
+  var slogan=(document.getElementById('clanSloganInput').value||'').trim();
+  var badge=document.getElementById('clanBadgeInput').value;
+  if(!name){notify('❌ نام گروه را وارد کنید','error');return;}
+  siteClan={name:name,slogan:slogan||'بدون شعار',badge:badge,leader:currentUserName,deputies:[],members:[],entryStatus:'open',level:1,chatEnabled:true,emojiEnabled:true,createdAt:Date.now(),creationCost:150,costCharged:false};
+  saveSiteClan(); renderClanBadges(); notify('🏰 کلن با موفقیت ساخته شد؛ ۱۵۰ جم از شما کسر نشد.','success'); openClanPanel();
+}
+function promoteClanDeputy(){
+  if(!canClanManage())return;
+  var n=document.getElementById('clanPromoteSelect').value; if(!n)return;
+  if(siteClan.deputies.indexOf(n)===-1)siteClan.deputies.push(n); saveSiteClan(); notify('⬆️ '+n+' معاون کلن شد','success'); openClanPanel();
+}
+function demoteClanDeputy(){
+  if(!canClanManage())return; var n=document.getElementById('clanDemoteSelect').value;if(!n)return;
+  siteClan.deputies=siteClan.deputies.filter(function(x){return x!==n;});saveSiteClan();notify('⬇️ '+n+' از مقام معاون تنزل یافت','warning');openClanPanel();
+}
+function transferClanOwnership(){
+  if(!canClanManage())return; var n=document.getElementById('clanTransferSelect').value;if(!n)return;
+  siteClan.leader=n; siteClan.deputies=siteClan.deputies.filter(function(x){return x!==n;}); saveSiteClan(); notify('🔄 مالکیت کلن به '+n+' منتقل شد','success'); openClanPanel();
+}
+function toggleClanChat(){if(!canClanManage())return;siteClan.chatEnabled=!siteClan.chatEnabled;saveSiteClan();openClanPanel();}
+function toggleClanEmoji(){if(!canClanManage())return;siteClan.emojiEnabled=!siteClan.emojiEnabled;saveSiteClan();openClanPanel();}
+function saveClanSettings(){
+  if(!canClanManage())return;
+  var ne=document.getElementById('clanEditName');
+  var ns=document.getElementById('clanEditSlogan');
+  var nb=document.getElementById('clanEditBadge');
+  if(ne && ne.value.trim()) siteClan.name=ne.value.trim();
+  if(ns) siteClan.slogan=ns.value.trim() || 'بدون شعار';
+  if(nb) siteClan.badge=nb.value;
+  siteClan.entryStatus=document.getElementById('clanEntrySelect').value;
+  siteClan.level=Math.max(1, parseInt(document.getElementById('clanLevelSelect').value,10)||1);
+  if (isOwner && document.getElementById('siteOwnerLevelInput')) { currentUserLevel=Math.max(1, parseInt(document.getElementById('siteOwnerLevelInput').value,10)||1); localStorage.setItem('msh_level_'+currentUserName, String(currentUserLevel)); }
+  saveSiteClan(); renderClanBadges(); renderRoom(); notify('✅ نام، شعار، سطح و تیک گروه تغییر کرد','success'); openClanPanel();
+}
+
+function stopAllMics() {
+  if (!isOwner && !isModerator) { notify('❌ فقط ناظر یا سازنده', 'error'); return; }
+  allMicsBlocked = true;
+  notify('🔇 صحبت همه متوقف شد', 'warning');
+}
+
+function openAllMics() {
+  if (!isOwner && !isModerator) { notify('❌ فقط ناظر یا سازنده', 'error'); return; }
+  allMicsBlocked = false;
+  notify('🎤 مایک همه باز شد', 'success');
+}
+</script>
+
+<div class="modal" id="giftModal"><div class="modal-content">
+<h2>🎁 ارسال هدیه</h2>
+<div class="form-group"><label>کد کاربری</label><input id="giftCode"></div>
+<div class="form-group"><label>نوع</label><select id="giftType"><option value="coin">🪙 سکه</option><option value="gem">💎 جم</option></select></div>
+<div class="form-group"><label>تعداد</label><input id="giftAmount" type="number" value="100"></div>
+<button class="btn btn-green" onclick="sendGift()" style="width:100%;">اهدا</button>
+<button class="close-btn" onclick="closeGiftModal()">بستن</button>
+</div></div>
+<script>
+var giftTransfers=[];var lobbyReward={type:'coin',amount:0,auto:true};
+function openGiftModal(){giftModal.classList.add('active')}
+function closeGiftModal(){giftModal.classList.remove('active')}
+function sendGift(){const c=giftCode.value.trim();const t=giftType.value;const a=parseInt(giftAmount.value)||0;if(!c||a<1){alert('کد و تعداد را وارد کنید');return;}giftTransfers.push({to:c,type:t,amount:a});alert('هدیه ثبت شد برای '+c);closeGiftModal();}
+function setReward(auto){lobbyReward={type:rewardType.value,amount:parseInt(rewardAmount.value)||0,auto:auto};rewardInfo.innerText='ثبت شد: '+lobbyReward.amount+' '+(lobbyReward.type==='coin'?'سکه':'جم')+(auto?' (خودکار)':' (دلخواه)');}
+function giveRewardToWinner(code){if(lobbyReward.amount<1)return;giftTransfers.push({to:code,type:lobbyReward.type,amount:lobbyReward.amount});alert('جایزه به '+code+' واریز شد');}
+</script>
+
+</body>
+</html>
+<script>
+function showScenarioInfo(){
+ const t = selectedScenario==='lastlight'
+ ? '🎭 آخرین چراغ (۶ نفره)\n\n🔴 پدرخوانده\n🕶️ مافیای سایه\n🔵 کارآگاه\n🩺 پزشک\n🕯️ چراغ‌دار\n👤 شهروند\n\nقانون: چراغ‌دار فقط یک بار قتل همان شب را خنثی می‌کند.'
+ : 'توضیحات این سناریو';
+ alert(t);
+}
+</script>
